@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+
+
+
+<html lang="th">
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>หน้าหลักลูกค้า | Cat Spa & Grooming</title>
+
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
+
+</head>
+
+
+
+<body class="customer-dashboard">
+
+
+
+<!-- NAVBAR -->
+
+
+
+<header class="customer-navbar">
+
+
+
+    <a href="{{ url_for('dashboard') }}" class="brand">
+
+
+
+        <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}"
+
+
+
+             alt="Cat Spa Logo" class="site-logo">
+
+
+
+        <span>Cat Spa <small>& Grooming</small></span>
+
+
+
+    </a>
+
+
+
+    <nav class="customer-nav">
+
+
+
+        <a href="{{ url_for('dashboard') }}" class="active">หน้าหลัก</a>
+
+
+
+        <a href="{{ url_for('staff_page') }}">ทีมผู้เชี่ยวชาญ</a>
+
+
+
+        <a href="{{ url_for('my_cats') }}">แมวของฉัน</a>
+
+
+
+        <a href="{{ url_for('new_booking') }}">จองคิว</a>
+
+
+
+        <a href="{{ url_for('bookings') }}">การจองของฉัน</a>
+
+
+
+    </nav>
+
+
+
+    <div class="customer-user">
+
+
+
+        <!-- โหมดแจ้งเตือนสำหรับลูกค้า (Notification Bell & Dropdown) -->
+
+
+
+        <div class="notification-wrapper" id="notifWrapper">
+
+
+
+            <button type="button" class="notification-bell-btn" id="notifBellBtn" title="โหมดแจ้งเตือน">
+
+
+
+                <span>🔔</span>
+
+
+
+                {% if unread_notifications_count and unread_notifications_count > 0 %}
+
+
+
+                    <span class="notification-badge">{{ unread_notifications_count }}</span>
+
+
+
+                {% endif %}
+
+
+
+            </button>
+
+
+
+            <div class="notification-dropdown" id="notifDropdown">
+
+
+
+                <div class="notification-dropdown-header">
+
+
+
+                    <h4>🔔 โหมดแจ้งเตือน</h4>
+
+
+
+                    {% if unread_notifications_count and unread_notifications_count > 0 %}
+
+
+
+                        <span class="notif-count-pill">{{ unread_notifications_count }} รายการ</span>
+
+
+
+                    {% endif %}
+
+
+
+                </div>
+
+
+
+                <div class="notification-dropdown-body">
+
+
+
+                    {% if customer_notifications %}
+
+
+
+                        {% for notif in customer_notifications %}
+
+
+
+                            {% if notif['payment_status'] == 'สลิปไม่ถูกต้อง' %}
+
+
+
+                                <div class="notification-item item-slip-rejected">
+
+
+
+                                    <div class="notif-item-icon">⚠️</div>
+
+
+
+                                    <div class="notif-item-content">
+
+
+
+                                        <strong class="notif-item-title">สลิปการโอนเงินไม่ถูกต้อง</strong>
+
+
+
+                                        <p class="notif-item-desc">
+
+
+
+                                            การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) น้อง{{ notif['cat_name'] }} แอดมินแจ้งว่าสลิปไม่ถูกต้อง กรุณาแนบใหม่
+
+
+
+                                        </p>
+
+
+
+                                        <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-orange">
+
+
+
+                                            📸 แนบสลิปใหม่ →
+
+
+
+                                        </a>
+
+
+
+                                    </div>
+
+
+
+                                </div>
+
+
+
+                            {% elif notif['status'] == 'เสร็จสิ้น' and (notif['has_reviewed'] is none or notif['has_reviewed'] == 0) %}
+
+
+
+                                <div class="notification-item" style="border-left: 3.5px solid #ec4899; background: #fff8fa;">
+
+
+
+                                    <div class="notif-item-icon">⭐</div>
+
+
+
+                                    <div class="notif-item-content">
+
+
+
+                                        <strong class="notif-item-title" style="color: #9d174d;">บริการน้อง{{ notif['cat_name'] }} เสร็จสิ้นแล้ว</strong>
+
+
+
+                                        <p class="notif-item-desc">
+
+
+
+                                            การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) เชิญร่วมรีวิวร้านและพี่ๆ ผู้ดูแล เพื่อรับสิทธิพิเศษค่ะ ♡
+
+
+
+                                        </p>
+
+
+
+                                        <a href="{{ url_for('review_booking', booking_id=notif['booking_id']) }}" class="notif-action-btn" style="background: #db2777; color: white;">
+
+
+
+                                            ⭐ เขียนรีวิวทันที →
+
+
+
+                                        </a>
+
+
+
+                                    </div>
+
+
+
+                                </div>
+
+
+
+                            {% elif notif['status'] in ['ยกเลิก', 'ยกเลิกแล้ว', 'ปฏิเสธ'] %}
+
+
+
+                                <div class="notification-item item-cancelled">
+
+
+
+                                    <div class="notif-item-icon">❌</div>
+
+
+
+                                    <div class="notif-item-content">
+
+
+
+                                        <strong class="notif-item-title">การจองถูกยกเลิก</strong>
+
+
+
+                                        <p class="notif-item-desc">
+
+
+
+                                            การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) วันที่ {{ notif['booking_date'] }} ถูกยกเลิกแล้ว
+
+
+
+                                        </p>
+
+
+
+                                        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+
+
+
+                                            <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-gray">
+
+
+
+                                                ดูรายการ →
+
+
+
+                                            </a>
+
+
+
+                                            <form method="POST" action="{{ url_for('dismiss_notification', booking_id=notif['booking_id']) }}" style="display: inline;">
+
+
+
+                                                <button type="submit" style="background: none; border: none; color: #9ca3af; font-size: 11px; cursor: pointer; text-decoration: underline;">
+
+
+
+                                                    ✓ รับทราบ
+
+
+
+                                                </button>
+
+
+
+                                            </form>
+
+
+
+                                        </div>
+
+
+
+                                    </div>
+
+
+
+                                </div>
+
+
+
+                            {% endif %}
+
+
+
+                        {% endfor %}
+
+
+
+                    {% else %}
+
+
+
+                        <div class="notification-empty">
+
+
+
+                            <span>✨</span>
+
+
+
+                            <p>ไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
+
+
+
+                        </div>
+
+
+
+                    {% endif %}
+
+
+
+                </div>
+
+
+
+                <div class="notification-dropdown-footer">
+
+
+
+                    <a href="{{ url_for('bookings') }}">ไปยังหน้าการจองของฉันทั้งหมด →</a>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+        <span class="user-greeting">สวัสดีคุณ {{ name }} 🐾</span>
+
+
+
+        <a href="{{ url_for('logout') }}" class="logout-btn">
+
+
+
+            ออกจากระบบ
+
+
+
+        </a>
+
+
+
+    </div>
+
+
+
+</header>
+
+
+
+<main class="customer-main">
+
+
+
+    <!-- 1. HERO BANNER -->
+
+
+
+    <section class="hero-banner">
+
+
+
+        <div class="hero-content">
+
+
+
+            <span class="hero-eyebrow">🐾 WELCOME TO CAT SPA</span>
+
+
+
+            <h1>สวัสดีคุณ {{ name }} 🐱</h1>
+
+
+
+            <h2>ดูแลน้องเหมือนคนในครอบครัว</h2>
+
+
+
+            <p>
+
+
+
+                เติมเต็มวันพิเศษให้น้องแมวที่คุณรัก ด้วยบริการอาบน้ำ สปาบำรุงขน
+
+
+
+                และความสะอาดอย่างอ่อนโยน โดยทีมงานมืออาชีพที่ใส่ใจในทุกขั้นตอน
+
+
+
+            </p>
+
+
+
+            <div class="hero-actions">
+
+
+
+                <a href="{{ url_for('new_booking') }}" class="primary-btn">
+
+
+
+                    จองบริการเลย <span>→</span>
+
+
+
+                </a>
+
+
+
+                <a href="{{ url_for('my_cats') }}" class="secondary-btn">
+
+
+
+                    ดูสมาชิกตัวน้อย 🐾
+
+
+
+                </a>
+
+
+
+            </div>
+
+
+
+            <div class="hero-note">
+
+
+
+                <span>♡</span> ทุกอุ้งเท้าคือความสุขของเรา
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+        <div class="hero-visual">
+
+
+
+            <div class="hero-visual-bg"></div>
+
+
+
+            <img
+
+
+
+                src="{{ url_for('static', filename='images/cat-spa-hero.png') }}"
+
+
+
+                data-fallback="{{ url_for('static', filename='images/cat-bath.png') }}"
+
+
+
+                alt="น้องแมวกำลังผ่อนคลายที่ Cat Spa"
+
+
+
+                class="hero-banner-cat"
+
+
+
+                onerror="this.onerror=null; this.src=this.dataset.fallback;"
+
+
+
+            >
+
+
+
+            <!-- ตกแต่งด้วยฟองสบู่ หัวใจ และอุ้งเท้า -->
+
+
+
+            <span class="bubble bubble-1">🫧</span>
+
+
+
+            <span class="bubble bubble-2">🫧</span>
+
+
+
+            <span class="bubble bubble-3">🫧</span>
+
+
+
+            <span class="float-paw paw-one">🐾</span>
+
+
+
+            <span class="float-paw paw-two">♡</span>
+
+
+
+            <span class="hero-sticker">Happy Cat<br>Care ♡</span>
+
+
+
+        </div>
+
+
+
+    </section>
+
+
+
+    <!-- แบนเนอร์แจ้งเตือนให้ลูกค้าร่วมรีวิว เมื่อบริการเสร็จสิ้น -->
+
+
+
+    {% if pending_reviews %}
+
+
+
+    <section style="background: linear-gradient(135deg, #fff0f5 0%, #fce7f0 100%); border: 1.5px solid #f472b6; border-radius: 20px; padding: 20px 24px; margin: 24px 0 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 6px 22px rgba(237, 86, 130, 0.15);">
+
+
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+
+
+
+            <div style="font-size: 32px; background: white; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 3px 10px rgba(0,0,0,0.08); flex-shrink: 0;">🎉</div>
+
+
+
+            <div>
+
+
+
+                <h3 style="margin: 0; color: #9d174d; font-size: 17px; font-weight: 800;">
+
+
+
+                    น้องแมวของคุณเพิ่งรับบริการเสร็จสิ้น! เชิญร่วมแชร์ความประทับใจ
+
+
+
+                </h3>
+
+
+
+                <p style="margin: 4px 0 0; font-size: 13.5px; color: #701a75;">
+
+
+
+                    คุณมีรายการจองที่เสร็จสิ้นรอการรีวิว {{ pending_reviews|length }} รายการ ร่วมให้คะแนนร้านและพี่ๆ พนักงาน เพื่อรับสิทธิพิเศษค่ะ ♡
+
+
+
+                </p>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+        <a href="{{ url_for('review_booking', booking_id=pending_reviews[0]['booking_id']) }}" style="background: linear-gradient(135deg, #ed5682 0%, #f07297 100%); color: white; padding: 11px 24px; border-radius: 25px; font-weight: 800; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(237, 86, 130, 0.35); transition: transform 0.2s;">
+
+
+
+            <span>⭐</span> เขียนรีวิวตอนนี้ →
+
+
+
+        </a>
+
+
+
+    </section>
+
+
+
+    {% endif %}
+
+
+
+    <!-- 2. MY CATS (สมาชิกตัวน้อยของฉัน) -->
+
+
+
+    <section class="section-block">
+
+
+
+        <div class="section-heading">
+
+
+
+            <div>
+
+
+
+                <span class="section-kicker">MY LITTLE FAMILY</span>
+
+
+
+                <h2>สมาชิกตัวน้อยของฉัน 🐱</h2>
+
+
+
+                <p>ข้อมูลและรูปน้องแมวของคุณ (เลื่อนดูในแนวนอนได้เมื่อมีหลายตัว)</p>
+
+
+
+            </div>
+
+
+
+            <div class="heading-actions">
+
+
+
+                <a href="{{ url_for('add_cat') }}" class="btn-sm btn-primary">
+
+
+
+                    + เพิ่มน้องแมว
+
+
+
+                </a>
+
+
+
+                <a href="{{ url_for('my_cats') }}" class="text-link">
+
+
+
+                    จัดการข้อมูลแมวทั้งหมด →
+
+
+
+                </a>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+        {% if cats %}
+
+
+
+            <!-- แนวนอนเลื่อนได้สำหรับสมาชิกตัวน้อย -->
+
+
+
+            <div class="my-cats-scroll-container">
+
+
+
+                <div class="my-cats-scroll">
+
+
+
+                    {% for cat in cats %}
+
+
+
+                        <a href="{{ url_for('edit_cat', cat_id=cat['cat_id']) }}" class="my-cat-card" title="กดเพื่อดูหรือแก้ไขข้อมูลน้อง {{ cat['cat_name'] }}">
+
+
+
+                            <div class="my-cat-photo">
+
+
+
+                                {% if cat['image'] %}
+
+
+
+                                    <img
+
+
+
+                                        src="{{ url_for('uploaded_cat_image', filename=cat['image']) }}"
+
+
+
+                                        alt="รูป {{ cat['cat_name'] }}"
+
+
+
+                                        loading="lazy"
+
+
+
+                                    >
+
+
+
+                                {% else %}
+
+
+
+                                    <div class="cat-placeholder">🐈</div>
+
+
+
+                                {% endif %}
+
+
+
+                                <span class="cat-heart">♡</span>
+
+
+
+                            </div>
+
+
+
+                            <div class="my-cat-info">
+
+
+
+                                <h3>{{ cat['cat_name'] }}</h3>
+
+
+
+                                <p class="cat-breed">{{ cat['breed'] or 'ไม่ระบุสายพันธุ์' }}</p>
+
+
+
+                                <div class="cat-meta">
+
+
+
+                                    <span>🎂 {{ cat['age'] or '-' }} ปี</span>
+
+
+
+                                </div>
+
+
+
+                                <span class="cat-profile-link">
+
+
+
+                                    แก้ไขข้อมูล →
+
+
+
+                                </span>
+
+
+
+                            </div>
+
+
+
+                        </a>
+
+
+
+                    {% endfor %}
+
+
+
+                    <!-- การ์ดเพิ่มน้องแมวในแถบแนวนอน -->
+
+
+
+                    <a href="{{ url_for('add_cat') }}" class="add-cat-card">
+
+
+
+                        <span class="add-cat-icon">＋</span>
+
+
+
+                        <strong>+ เพิ่มน้องแมว</strong>
+
+
+
+                        <span>เพิ่มข้อมูลและรูปน้องตัวใหม่</span>
+
+
+
+                    </a>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        {% else %}
+
+
+
+            <div class="empty-panel">
+
+
+
+                <div class="empty-cat-icon">🐈</div>
+
+
+
+                <h3>ยังไม่มีสมาชิกตัวน้อยในระบบ</h3>
+
+
+
+                <p>เพิ่มข้อมูลและรูปน้องแมวของคุณ เพื่อความสะดวกในการเลือกจองบริการ</p>
+
+
+
+                <a href="{{ url_for('add_cat') }}" class="primary-btn">
+
+
+
+                    + เพิ่มน้องแมว
+
+
+
+                </a>
+
+
+
+            </div>
+
+
+
+        {% endif %}
+
+
+
+    </section>
+
+
+
+    <!-- 3. BOOKING SUMMARY (กล่องสรุปการจองของฉัน) -->
+
+
+
+    <section class="section-block">
+
+
+
+        <div class="section-heading">
+
+
+
+            <div>
+
+
+
+                <span class="section-kicker">YOUR APPOINTMENTS</span>
+
+
+
+                <h2>กล่องสรุปการจองของฉัน 📋</h2>
+
+
+
+                <p>เช็กสถานะคิวของน้องได้ง่าย ๆ ครบจบในที่เดียว ไม่ต้องเปิดหลายหน้า</p>
+
+
+
+            </div>
+
+
+
+            <a href="{{ url_for('bookings') }}" class="text-link">
+
+
+
+                ดูการจองทั้งหมด →
+
+
+
+            </a>
+
+
+
+        </div>
+
+
+
+        <div class="summary-grid">
+
+
+
+            <article class="summary-card summary-pending">
+
+
+
+                <div class="summary-icon">⏳</div>
+
+
+
+                <div class="summary-text">
+
+
+
+                    <p>จำนวนคิวที่รอยืนยัน</p>
+
+
+
+                    <strong>{{ pending_count }}</strong>
+
+
+
+                    <span>รายการ</span>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <article class="summary-card summary-confirmed">
+
+
+
+                <div class="summary-icon">✅</div>
+
+
+
+                <div class="summary-text">
+
+
+
+                    <p>จำนวนคิวที่ยืนยันแล้ว</p>
+
+
+
+                    <strong>{{ confirmed_count }}</strong>
+
+
+
+                    <span>รายการ</span>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <article class="summary-card summary-total">
+
+
+
+                <div class="summary-icon">📋</div>
+
+
+
+                <div class="summary-text">
+
+
+
+                    <p>การจองทั้งหมด</p>
+
+
+
+                    <strong>{{ total_bookings }}</strong>
+
+
+
+                    <span>รายการ</span>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <article class="summary-card summary-completed">
+
+
+
+                <div class="summary-icon">✨</div>
+
+
+
+                <div class="summary-text">
+
+
+
+                    <p>ใช้บริการเสร็จแล้ว</p>
+
+
+
+                    <strong>{{ completed_count }}</strong>
+
+
+
+                    <span>รายการ</span>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+        </div>
+
+
+
+        <!-- วันและเวลานัดหมายครั้งถัดไป -->
+
+
+
+        <div class="next-appointment-card">
+
+
+
+            <div class="appointment-icon-wrap">
+
+
+
+                <span class="appointment-icon">📅</span>
+
+
+
+            </div>
+
+
+
+            <div class="appointment-info">
+
+
+
+                <span class="appointment-tag">วันและเวลานัดครั้งถัดไป</span>
+
+
+
+                {% if next_booking %}
+
+
+
+                    <h3>บริการ {{ next_booking['service_name'] }}</h3>
+
+
+
+                    <p class="appointment-meta">
+
+
+
+                        <span>🗓 วันที่ <strong>{{ next_booking['booking_date'] }}</strong></span>
+
+
+
+                        <span>⏰ เวลา <strong>{{ next_booking['booking_time'] }} น.</strong></span>
+
+
+
+                        <span class="status-badge status-confirmed">✓ {{ next_booking['status'] }}</span>
+
+
+
+                    </p>
+
+
+
+                {% else %}
+
+
+
+                    <h3>ยังไม่มีคิวนัดหมายที่ยืนยันแล้วในเร็ว ๆ นี้</h3>
+
+
+
+                    <p class="appointment-empty-note">
+
+
+
+                        เลือกลงคิวนัดหมายให้น้องแมวล่วงหน้า เพื่อรับบริการที่สะดวกและรวดเร็ว 💗
+
+
+
+                    </p>
+
+
+
+                {% endif %}
+
+
+
+            </div>
+
+
+
+            <div class="appointment-action">
+
+
+
+                {% if next_booking %}
+
+
+
+                    <a href="{{ url_for('bookings') }}" class="primary-btn">
+
+
+
+                        ดูการจองทั้งหมด →
+
+
+
+                    </a>
+
+
+
+                {% else %}
+
+
+
+                    <a href="{{ url_for('new_booking') }}" class="primary-btn">
+
+
+
+                        จองบริการเลย →
+
+
+
+                    </a>
+
+
+
+                {% endif %}
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+                <!-- ปฏิทินคิวนัดหมายน่ารัก (Cute Booking Calendar) -->
+
+        <div class="cute-calendar-card">
+
+            <div class="cute-calendar-header">
+
+                <div class="cal-title-group">
+
+                    <span class="cal-badge">🐾 APPOINTMENT CALENDAR</span>
+
+                    <h3>ปฏิทินคิวนัดหมายของฉัน 🐾</h3>
+
+                    <p>มาร์กจุดวันที่น้องแมวของคุณสะดวก (คลิกวันที่เพื่อดูรายละเอียดคิวจอง)</p>
+
+                </div>
+
+
+
+                <div class="cal-nav-group">
+
+                    <button type="button" class="cal-btn-nav" id="calPrevBtn" aria-label="เดือนก่อนหน้า">‹</button>
+
+                    <span class="cal-current-month" id="calMonthDisplay">🗓️ ตุลาคม 2569</span>
+
+                    <button type="button" class="cal-btn-nav" id="calNextBtn" aria-label="เดือนถัดไป">›</button>
+
+                    <button type="button" class="cal-btn-today" id="calTodayBtn">วันนี้ 🐾</button>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="cute-calendar-layout">
+
+                <!-- ฝั่งซ้าย: ตารางปฏิทินรูปหัวแมว -->
+
+                <div class="cal-grid-container">
+
+                    <!-- น้องแมวเกาะขอบบนปฏิทิน (Peeking Cat) -->
+
+                    <img src="{{ url_for('static', filename='images/cal_peeking_cat.png') }}" class="cal-peeking-cat" alt="Peeking Cat">
+
+
+
+                    <div class="cal-weekdays-row">
+
+                        <span class="cal-weekday cal-sun">อา</span>
+
+                        <span class="cal-weekday">จ</span>
+
+                        <span class="cal-weekday">อ</span>
+
+                        <span class="cal-weekday">พ</span>
+
+                        <span class="cal-weekday">พฤ</span>
+
+                        <span class="cal-weekday">ศ</span>
+
+                        <span class="cal-weekday cal-sat">ส</span>
+
+                    </div>
+
+
+
+                    <div class="cal-days-grid" id="calDaysGrid">
+
+                        <!-- Rendered by JavaScript -->
+
+                    </div>
+
+
+
+                    <div class="cal-legend-bar">
+
+                        <div class="cal-legend-item">
+
+                            <span class="legend-dot dot-confirmed"></span>
+
+                            <span>ยืนยันแล้ว</span>
+
+                        </div>
+
+                        <div class="cal-legend-item">
+
+                            <span class="legend-dot dot-pending"></span>
+
+                            <span>รอคอนเฟิร์ม</span>
+
+                        </div>
+
+                        <div class="cal-legend-item">
+
+                            <span class="legend-dot dot-completed"></span>
+
+                            <span>เสร็จสิ้น</span>
+
+                        </div>
+
+                        <div class="cal-legend-item">
+
+                            <span class="legend-paw-icon">🐾</span>
+
+                            <span>มีคิวจอง</span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ไหมพรมตกแต่งมุมขวาล่าง -->
+
+                    <img src="{{ url_for('static', filename='images/cal_yarn_ball.png') }}" class="cal-yarn-ball" alt="Yarn Ball">
+
+                </div>
+
+
+
+                <!-- ฝั่งขวา: รายละเอียดคิวของวันที่เลือก -->
+
+                <div class="cal-day-detail-panel">
+
+                    <div class="detail-panel-header">
+
+                        <span class="panel-tag" id="panelSelectedDateTag">🗓️ คิวนัดหมายประจำวัน 🐾</span>
+
+                        <h4 id="panelSelectedDateTitle">เลือกวันที่บนปฏิทิน</h4>
+
+                    </div>
+
+
+
+                    <div class="detail-panel-body" id="panelBookingsList">
+
+                        <!-- Populated by JavaScript -->
+
+                    </div>
+
+
+
+                    <!-- น้องแมวแอบมองที่มุมขวาล่าง -->
+
+                    <img src="{{ url_for('static', filename='images/cal_corner_cat.png') }}" class="cal-corner-cat" alt="Corner Cat">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- 4. POPULAR SERVICES (การ์ดบริการยอดนิยม) -->
+
+
+
+    <section class="section-block">
+
+
+
+        <div class="section-heading">
+
+
+
+            <div>
+
+
+
+                <span class="section-kicker">POPULAR SERVICES</span>
+
+
+
+                <h2>การ์ดบริการยอดนิยม ✨</h2>
+
+
+
+                <p>แสดงรูปจริงของบริการแต่ละประเภท พร้อมราคาและระยะเวลาชัดเจน</p>
+
+
+
+            </div>
+
+
+
+            <a href="{{ url_for('new_booking') }}" class="text-link">
+
+
+
+                จองบริการตอนนี้ →
+
+
+
+            </a>
+
+
+
+        </div>
+
+
+
+        <div class="popular-services-grid">
+
+
+
+            <!-- 1. อาบน้ำแมว -->
+
+
+
+            <article class="popular-service-card">
+
+
+
+                <div class="service-img-header">
+
+
+
+                    <img
+
+
+
+                        src="{{ url_for('static', filename='images/cat-bath.png') }}"
+
+
+
+                        alt="บริการอาบน้ำแมว"
+
+
+
+                        class="service-real-img"
+
+
+
+                        loading="lazy"
+
+
+
+                    >
+
+
+
+                    <span class="service-badge-popular">ยอดนิยม</span>
+
+
+
+                    <span class="service-icon-badge">🛁</span>
+
+
+
+                </div>
+
+
+
+                <div class="service-card-body">
+
+
+
+                    <h3>อาบน้ำแมว</h3>
+
+
+
+                    <p>ทำความสะอาดขนและผิวหนัง ล้างแชมพู เช็ดตัว และเป่าขนให้แห้งนุ่ม สบายตัว</p>
+
+
+
+                    <div class="service-specs">
+
+
+
+                        <span class="spec-price">เริ่มต้น <strong>{{ min_prices.get('bath', 300) }}</strong> บาท</span>
+
+
+
+                        <span class="spec-time">⏱ 60 นาที</span>
+
+
+
+                    </div>
+
+
+
+                    <div class="service-card-footer">
+
+
+
+                        <a href="{{ url_for('service_detail', service_id='bath') }}" class="btn-detail">
+
+
+
+                            ดูรายละเอียด
+
+
+
+                        </a>
+
+
+
+                        <a href="{{ url_for('new_booking', category='bath') }}" class="btn-book-quick">
+
+
+
+                            จองคิว →
+
+
+
+                        </a>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <!-- 2. สปาแมว -->
+
+
+
+            <article class="popular-service-card">
+
+
+
+                <div class="service-img-header">
+
+
+
+                    <img
+
+
+
+                        src="{{ url_for('static', filename='images/cat-grooming.png') }}"
+
+
+
+                        alt="บริการสปาแมว"
+
+
+
+                        class="service-real-img"
+
+
+
+                        loading="lazy"
+
+
+
+                    >
+
+
+
+                    <span class="service-badge-recommend">แนะนำ</span>
+
+
+
+                    <span class="service-icon-badge">🧴</span>
+
+
+
+                </div>
+
+
+
+                <div class="service-card-body">
+
+
+
+                    <h3>สปาแมว</h3>
+
+
+
+                    <p>บำรุงขนให้นุ่มสวย ผ่อนคลายด้วยผลิตภัณฑ์ดูแลผิวสำหรับแมวโดยเฉพาะ</p>
+
+
+
+                    <div class="service-specs">
+
+
+
+                        <span class="spec-price">เริ่มต้น <strong>{{ min_prices.get('spa', 450) }}</strong> บาท</span>
+
+
+
+                        <span class="spec-time">⏱ 90 นาที</span>
+
+
+
+                    </div>
+
+
+
+                    <div class="service-card-footer">
+
+
+
+                        <a href="{{ url_for('service_detail', service_id='spa') }}" class="btn-detail">
+
+
+
+                            ดูรายละเอียด
+
+
+
+                        </a>
+
+
+
+                        <a href="{{ url_for('new_booking', category='spa') }}" class="btn-book-quick">
+
+
+
+                            จองคิว →
+
+
+
+                        </a>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <!-- 3. ตัดแต่งขน -->
+
+
+
+            <article class="popular-service-card">
+
+
+
+                <div class="service-img-header">
+
+
+
+                    <img
+
+
+
+                        src="{{ url_for('static', filename='images/cat-haircut.png') }}"
+
+
+
+                        alt="บริการตัดแต่งขน"
+
+
+
+                        class="service-real-img"
+
+
+
+                        loading="lazy"
+
+
+
+                    >
+
+
+
+                    <span class="service-badge-popular">ยอดนิยม</span>
+
+
+
+                    <span class="service-icon-badge">✂️</span>
+
+
+
+                </div>
+
+
+
+                <div class="service-card-body">
+
+
+
+                    <h3>ตัดแต่งขน</h3>
+
+
+
+                    <p>จัดแต่งทรงขนให้สวยงาม เล็มขนบริเวณสำคัญ ดูแลความสะอาดอย่างปลอดภัย</p>
+
+
+
+                    <div class="service-specs">
+
+
+
+                        <span class="spec-price">เริ่มต้น <strong>{{ min_prices.get('haircut', 200) }}</strong> บาท</span>
+
+
+
+                        <span class="spec-time">⏱ 45 นาที</span>
+
+
+
+                    </div>
+
+
+
+                    <div class="service-card-footer">
+
+
+
+                        <a href="{{ url_for('service_detail', service_id='haircut') }}" class="btn-detail">
+
+
+
+                            ดูรายละเอียด
+
+
+
+                        </a>
+
+
+
+                        <a href="{{ url_for('new_booking', category='haircut') }}" class="btn-book-quick">
+
+
+
+                            จองคิว →
+
+
+
+                        </a>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+            <!-- 4. ตัดเล็บ -->
+
+
+
+            <article class="popular-service-card">
+
+
+
+                <div class="service-img-header">
+
+
+
+                    <img
+
+
+
+                        src="{{ url_for('static', filename='images/cat-nails.png') }}"
+
+
+
+                        alt="บริการตัดเล็บแมว"
+
+
+
+                        class="service-real-img"
+
+
+
+                        loading="lazy"
+
+
+
+                    >
+
+
+
+                    <span class="service-badge-recommend">แนะนำ</span>
+
+
+
+                    <span class="service-icon-badge">🐾</span>
+
+
+
+                </div>
+
+
+
+                <div class="service-card-body">
+
+
+
+                    <h3>ตัดเล็บ</h3>
+
+
+
+                    <p>ตัดแต่งปลายเล็บอย่างระมัดระวัง พร้อมตรวจดูความเรียบร้อยของอุ้งเท้าเบื้องต้น</p>
+
+
+
+                    <div class="service-specs">
+
+
+
+                        <span class="spec-price">เริ่มต้น <strong>{{ min_prices.get('nails', 100) }}</strong> บาท</span>
+
+
+
+                        <span class="spec-time">⏱ 30 นาที</span>
+
+
+
+                    </div>
+
+
+
+                    <div class="service-card-footer">
+
+
+
+                        <a href="{{ url_for('service_detail', service_id='nails') }}" class="btn-detail">
+
+
+
+                            ดูรายละเอียด
+
+
+
+                        </a>
+
+
+
+                        <a href="{{ url_for('new_booking', category='nails') }}" class="btn-book-quick">
+
+
+
+                            จองคิว →
+
+
+
+                        </a>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+        </div>
+
+
+
+    </section>
+
+
+
+    <!-- 5. LOVE BANNER -->
+
+
+
+    <section class="love-banner">
+
+
+
+        <span class="love-paw">🐾</span>
+
+
+
+        <div>
+
+
+
+            <h2>ความสุขของน้อง คือความสุขของเรา ♡</h2>
+
+
+
+            <p>Cat Spa & Grooming ยินดีให้บริการน้องแมวทุกตัวด้วยความรักและความใส่ใจ</p>
+
+
+
+        </div>
+
+
+
+        <span class="love-heart">♡</span>
+
+
+
+    </section>
+
+
+
+</main>
+
+
+
+<footer class="customer-footer">
+
+
+
+    <div class="footer-inner">
+
+
+
+        <p>Cat Spa & Grooming — ดูแลน้องแมวด้วยหัวใจ ♡ ทุกอุ้งเท้าคือความสุขของเรา</p>
+
+
+
+        <div class="footer-links">
+
+
+
+            <a href="{{ url_for('dashboard') }}">หน้าหลัก</a>
+
+
+
+            <span>·</span>
+
+
+
+            <a href="{{ url_for('my_cats') }}">แมวของฉัน</a>
+
+
+
+            <span>·</span>
+
+
+
+            <a href="{{ url_for('new_booking') }}">จองคิวบริการ</a>
+
+
+
+            <span>·</span>
+
+
+
+            <a href="{{ url_for('bookings') }}">ประวัติการจอง</a>
+
+
+
+            <span>·</span>
+
+
+
+            <a href="{{ url_for('terms') }}">ข้อตกลงและเงื่อนไข</a>
+
+
+
+            <span>·</span>
+
+
+
+            <a href="{{ url_for('privacy_policy') }}">นโยบายความเป็นส่วนตัว</a>
+
+
+
+        </div>
+
+
+
+</footer>
+
+
+
+<!-- ข้อมูลคิวจองสำหรับปฏิทิน (JSON Data) -->
+
+
+
+<script id="userBookingsData" type="application/json">
+
+
+
+[
+
+
+
+    {% for b in bookings %}
+
+
+
+    {
+
+
+
+        "id": {{ b['booking_id'] }},
+
+
+
+        "date": "{{ b['booking_date'] }}",
+
+
+
+        "time": "{{ b['booking_time'] }}",
+
+
+
+        "service": "{{ b['service_name'] | e }}",
+
+
+
+        "cat_name": "{{ (b['cat_name'] or 'น้องแมว') | e }}",
+
+
+
+        "status": "{{ b['status'] | e }}",
+
+
+
+        "price": "{{ b['price'] }}"
+
+
+
+    }{% if not loop.last %},{% endif %}
+
+
+
+    {% endfor %}
+
+
+
+]
+
+
+
+</script>
+
+
+
+<script>
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+
+    const rawData = document.getElementById("userBookingsData");
+
+
+
+    let bookings = [];
+
+
+
+    try {
+
+
+
+        bookings = JSON.parse(rawData.textContent || "[]");
+
+
+
+    } catch (e) {
+
+
+
+        bookings = [];
+
+
+
+    }
+
+
+
+    // จัดกลุ่มคิวจองตามวันที่ YYYY-MM-DD
+
+
+
+    const bookingsByDate = {};
+
+
+
+    bookings.forEach(function (b) {
+
+
+
+        if (!b.date) return;
+
+
+
+        if (!bookingsByDate[b.date]) {
+
+
+
+            bookingsByDate[b.date] = [];
+
+
+
+        }
+
+
+
+        bookingsByDate[b.date].push(b);
+
+
+
+    });
+
+
+
+    const thaiMonths = [
+
+
+
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+
+
+
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+
+
+
+    ];
+
+
+
+    function getTodayString() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    const todayObj = new Date();
+    let currentYear = todayObj.getFullYear();
+    let currentMonth = todayObj.getMonth();
+    let selectedDate = getTodayString();
+
+    const monthDisplay = document.getElementById("calMonthDisplay");
+
+
+
+    const daysGrid = document.getElementById("calDaysGrid");
+
+
+
+    const panelSelectedDateTag = document.getElementById("panelSelectedDateTag");
+
+
+
+    const panelSelectedDateTitle = document.getElementById("panelSelectedDateTitle");
+
+
+
+    const panelBookingsList = document.getElementById("panelBookingsList");
+
+
+
+    const prevBtn = document.getElementById("calPrevBtn");
+
+
+
+    const nextBtn = document.getElementById("calNextBtn");
+
+
+
+    const todayBtn = document.getElementById("calTodayBtn");
+
+
+
+    function formatThaiDateDisplay(dateStr) {
+
+
+
+        const parts = dateStr.split("-");
+
+
+
+        if (parts.length !== 3) return dateStr;
+
+
+
+        const d = parseInt(parts[2], 10);
+
+
+
+        const m = parseInt(parts[1], 10) - 1;
+
+
+
+        const y = parseInt(parts[0], 10) + 543;
+
+
+
+        return `${d} ${thaiMonths[m]} ${y}`;
+
+
+
+    }
+
+
+
+    function renderDayDetails(dateStr) {
+
+
+
+        if (!panelBookingsList) return;
+
+
+
+        panelSelectedDateTag.textContent = `📅 คิวนัดหมายประจำวัน`;
+
+
+
+        panelSelectedDateTitle.textContent = formatThaiDateDisplay(dateStr);
+
+
+
+        const dayBookings = bookingsByDate[dateStr] || [];
+
+
+
+        if (dayBookings.length === 0) {
+
+
+
+            panelBookingsList.innerHTML = `
+
+
+
+                                <div class="cal-empty-panel">
+
+                    <img src="/static/images/cal_sleeping_cat.png" class="cal-sleeping-cat" alt="Sleepy Cat">
+
+                    <h4 class="empty-title">ไม่มีคิวนัดหมายในวันนี้</h4>
+
+                    <p class="empty-desc">พาน้องแมวมาอาบน้ำ สปาขน หรือตัดแต่งขน เพื่อความสะอาดและผ่อนคลาย ♡</p>
+
+                    <a href="{{ url_for('new_booking') }}" class="btn-cal-book">
+
+                        + จองบริการให้น้องแมว 🐾
+
+                    </a>
+
+                </div>
+
+
+
+            `;
+
+
+
+            return;
+
+
+
+        }
+
+
+
+        let html = '';
+
+
+
+        dayBookings.forEach(function (b) {
+
+
+
+            let statusBadgeClass = 'status-pending';
+
+
+
+            let statusIcon = '⏳';
+
+
+
+            if (b.status === 'ยืนยันแล้ว') {
+
+
+
+                statusBadgeClass = 'status-confirmed';
+
+
+
+                statusIcon = '✓';
+
+
+
+            } else if (b.status === 'เสร็จสิ้น') {
+
+
+
+                statusBadgeClass = 'status-completed';
+
+
+
+                statusIcon = '✨';
+
+
+
+            } else if (b.status === 'ยกเลิก') {
+
+
+
+                statusBadgeClass = 'status-cancelled';
+
+
+
+                statusIcon = '✕';
+
+
+
+            }
+
+
+
+            html += `
+
+
+
+                <div class="cal-booking-item">
+
+
+
+                    <div class="booking-item-top">
+
+
+
+                        <div class="item-cat-name">
+
+
+
+                            <span class="cat-badge-emoji">🐱</span>
+
+
+
+                            <strong>${b.cat_name}</strong>
+
+
+
+                        </div>
+
+
+
+                        <span class="status-badge ${statusBadgeClass}">
+
+
+
+                            ${statusIcon} ${b.status}
+
+
+
+                        </span>
+
+
+
+                    </div>
+
+
+
+                    <div class="item-service-info">
+
+
+
+                        <p class="item-service-name">
+
+
+
+                            <strong>บริการ:</strong> ${b.service}
+
+
+
+                        </p>
+
+
+
+                        <div class="item-time-price">
+
+
+
+                            <span>⏰ <strong>${b.time} น.</strong></span>
+
+
+
+                            <span>💰 <strong>${b.price} บาท</strong></span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            `;
+
+
+
+        });
+
+
+
+        html += `
+
+
+
+            <div class="panel-action-row">
+
+
+
+                <a href="{{ url_for('bookings') }}" class="btn-cal-viewall">
+
+
+
+                    ดูประวัติการจองทั้งหมด →
+
+
+
+                </a>
+
+
+
+            </div>
+
+
+
+        `;
+
+
+
+        panelBookingsList.innerHTML = html;
+
+
+
+    }
+
+
+
+    function renderCalendar() {
+
+
+
+        if (!daysGrid || !monthDisplay) return;
+
+
+
+        const thaiYear = currentYear + 543;
+
+
+
+        monthDisplay.textContent = `${thaiMonths[currentMonth]} ${thaiYear}`;
+
+
+
+        const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay();
+
+
+
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+
+
+        const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+
+
+        daysGrid.innerHTML = '';
+
+
+
+        // วันของเดือนก่อนหน้า (ช่องว่างสีจาง)
+
+
+
+        for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+
+
+
+            const dayNum = prevMonthDays - i;
+
+
+
+            const cell = document.createElement("div");
+
+
+
+            cell.className = "cal-day-cell cal-day-empty";
+
+
+
+            cell.textContent = dayNum;
+
+
+
+            daysGrid.appendChild(cell);
+
+
+
+        }
+
+
+
+        // วันของเดือนปัจจุบัน
+
+
+
+        for (let d = 1; d <= daysInMonth; d++) {
+
+
+
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+
+
+            const cell = document.createElement("div");
+
+
+
+            cell.className = "cal-day-cell";
+
+
+
+            cell.dataset.date = dateStr;
+
+
+
+            const dayBookings = bookingsByDate[dateStr] || [];
+
+
+
+            const hasBooking = dayBookings.length > 0;
+
+
+
+            const isToday = (dateStr === getTodayString());
+
+
+
+            const isSelected = (dateStr === selectedDate);
+
+
+
+            if (isToday) cell.classList.add("is-today");
+
+
+
+            if (isSelected) cell.classList.add("is-selected");
+
+
+
+            let dotsHtml = '';
+
+
+
+            if (hasBooking) {
+
+
+
+                cell.classList.add("has-booking");
+
+
+
+                const hasConfirmed = dayBookings.some(function (b) { return b.status === 'ยืนยันแล้ว'; });
+
+
+
+                const hasPending = dayBookings.some(function (b) { return b.status === 'รอยืนยัน'; });
+
+
+
+                const hasCompleted = dayBookings.some(function (b) { return b.status === 'เสร็จสิ้น'; });
+
+
+
+                dotsHtml = '<div class="cal-dots-wrap">';
+
+
+
+                if (hasConfirmed) dotsHtml += '<span class="cal-dot dot-confirmed" title="ยืนยันแล้ว"></span>';
+
+
+
+                if (hasPending) dotsHtml += '<span class="cal-dot dot-pending" title="รอยืนยัน"></span>';
+
+
+
+                if (hasCompleted) dotsHtml += '<span class="cal-dot dot-completed" title="เสร็จสิ้น"></span>';
+
+
+
+                dotsHtml += '</div>';
+
+
+
+                dotsHtml += '<span class="cal-paw-marker">🐾</span>';
+
+
+
+            }
+
+
+
+            cell.innerHTML = `
+
+
+
+                <span class="cal-day-number">${d}</span>
+
+
+
+                ${dotsHtml}
+
+
+
+            `;
+
+
+
+            cell.addEventListener("click", function () {
+
+
+
+                selectedDate = this.dataset.date;
+
+
+
+                document.querySelectorAll(".cal-day-cell").forEach(function (c) {
+
+
+
+                    c.classList.remove("is-selected");
+
+
+
+                });
+
+
+
+                this.classList.add("is-selected");
+
+
+
+                renderDayDetails(selectedDate);
+
+
+
+            });
+
+
+
+            daysGrid.appendChild(cell);
+
+
+
+        }
+
+
+
+        renderDayDetails(selectedDate);
+
+
+
+    }
+
+
+
+    if (prevBtn) {
+
+
+
+        prevBtn.addEventListener("click", function () {
+
+
+
+            currentMonth--;
+
+
+
+            if (currentMonth < 0) {
+
+
+
+                currentMonth = 11;
+
+
+
+                currentYear--;
+
+
+
+            }
+
+
+
+            renderCalendar();
+
+
+
+        });
+
+
+
+    }
+
+
+
+    if (nextBtn) {
+
+
+
+        nextBtn.addEventListener("click", function () {
+
+
+
+            currentMonth++;
+
+
+
+            if (currentMonth > 11) {
+
+
+
+                currentMonth = 0;
+
+
+
+                currentYear++;
+
+
+
+            }
+
+
+
+            renderCalendar();
+
+
+
+        });
+
+
+
+    }
+
+
+
+    if (todayBtn) {
+        todayBtn.addEventListener("click", function () {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            selectedDate = getTodayString();
+            renderCalendar();
+        });
+    }
+
+
+
+    renderCalendar();
+
+
+
+    // จัดการเปิด-ปิด Dropdown โหมดแจ้งเตือน
+
+
+
+    const notifBellBtn = document.getElementById("notifBellBtn");
+
+
+
+    const notifDropdown = document.getElementById("notifDropdown");
+
+
+
+    if (notifBellBtn && notifDropdown) {
+
+
+
+        notifBellBtn.addEventListener("click", function(e) {
+
+
+
+            e.preventDefault();
+
+
+
+            e.stopPropagation();
+
+
+
+            notifDropdown.classList.toggle("show");
+
+
+
+        });
+
+
+
+        document.addEventListener("click", function(e) {
+
+
+
+            if (!notifDropdown.contains(e.target) && !notifBellBtn.contains(e.target)) {
+
+
+
+                notifDropdown.classList.remove("show");
+
+
+
+            }
+
+
+
+        });
+
+
+
+    }
+
+
+
+});
+
+
+
+</script>
+
+
+
+</body>
+
+
+
+</html>
+
+
+

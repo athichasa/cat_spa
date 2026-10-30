@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเสร็จรับเงิน #{{ b['booking_id'] }} | Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding: 30px 15px;
+            line-height: 1.5;
+        }
+
+        /* แถบเครื่องมือควบคุม (ไม่แสดงเมื่อสั่งพิมพ์) */
+        .action-toolbar {
+            max-width: 820px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: white;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .back-btn {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .back-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .print-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .toolbar-hint {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* กรอบตัวใบเสร็จ (A4 Ratio) */
+        .receipt-container {
+            max-width: 820px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            padding: 42px 46px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* หัวเอกสารและข้อมูลร้านค้า */
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .shop-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .shop-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fbcfe8;
+            background: #fff;
+        }
+
+        .shop-title h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #be185d;
+            margin-bottom: 3px;
+        }
+
+        .shop-title p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+            max-width: 360px;
+        }
+
+        .receipt-doc-meta {
+            text-align: right;
+        }
+
+        .receipt-badge-title {
+            display: inline-block;
+            background: #fdf2f8;
+            border: 1px solid #fbcfe8;
+            color: #be185d;
+            padding: 5px 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .meta-row {
+            font-size: 13.5px;
+            color: #475569;
+            margin-bottom: 3px;
+        }
+        .meta-row strong {
+            color: #0f172a;
+        }
+
+        /* กล่องข้อมูลลูกค้าและสัตว์เลี้ยง */
+        .customer-cat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin: 24px 0;
+        }
+
+        .info-col-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #be185d;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+
+        .info-col p {
+            font-size: 13.5px;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+        .info-col strong {
+            color: #0f172a;
+        }
+
+        /* ตารางรายการค่าบริการ */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 12px 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .items-table th:last-child {
+            text-align: right;
+        }
+
+        .items-table td {
+            padding: 14px 14px;
+            font-size: 13.5px;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .items-table td:last-child {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .item-subdesc {
+            font-size: 12.5px;
+            color: #64748b;
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        /* สรุปยอดเงินรวม */
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 28px;
+        }
+
+        .totals-table {
+            width: 320px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .totals-row.grand-total {
+            border-top: 2px solid #be185d;
+            padding-top: 10px;
+            margin-top: 6px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #be185d;
+        }
+        .totals-row.grand-total strong {
+            font-size: 22px;
+        }
+
+        /* ส่วนรับรองการชำระเงินและตราประทับดิจิทัล */
+        .payment-verification-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: #f0fdf4;
+            border: 1.5px solid #86efac;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+        }
+
+        .pay-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .pay-check-icon {
+            width: 44px;
+            height: 44px;
+            background: #dcfce7;
+            border: 2px solid #22c55e;
+            color: #15803d;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .pay-details h4 {
+            color: #166534;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .pay-details p {
+            font-size: 12.5px;
+            color: #14532d;
+            line-height: 1.4;
+        }
+
+        /* ตราประทับดิจิทัล PAID STAMP */
+        .paid-stamp {
+            border: 3px double #16a34a;
+            color: #16a34a;
+            padding: 6px 16px;
+            border-radius: 10px;
+            text-align: center;
+            transform: rotate(-4deg);
+            background: rgba(220, 252, 231, 0.4);
+            user-select: none;
+        }
+
+        .paid-stamp-text {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .paid-stamp-sub {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ท้ายเอกสารและลายเซ็น */
+        .receipt-footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 24px;
+            border-top: 1px dashed #cbd5e1;
+            margin-top: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-note {
+            font-size: 12.5px;
+            color: #64748b;
+            max-width: 420px;
+            line-height: 1.5;
+        }
+
+        .footer-signature {
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .sign-line {
+            width: 180px;
+            border-bottom: 1px solid #475569;
+            margin: 0 auto 6px;
+        }
+
+        .sign-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* สำหรับการสั่งพิมพ์ (Print to A4 / PDF) */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                color: #000 !important;
+            }
+
+            .action-toolbar {
+                display: none !important;
+            }
+
+            .receipt-container {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .customer-cat-grid {
+                background: #f8fafc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .items-table th {
+                background: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .payment-verification-box {
+                background: #f0fdf4 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .paid-stamp {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .receipt-container {
+                padding: 24px 18px;
+            }
+            .customer-cat-grid {
+                grid-template-columns: 1fr;
+            }
+            .receipt-doc-meta {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- แถบเครื่องมือ (พิมพ์ / ย้อนกลับ / ส่งอีเมล) ไม่แสดงเวลาพิมพ์ -->
+    <div class="action-toolbar">
+        <a href="{{ url_for('bookings') }}" class="action-btn back-btn">
+            ← กลับหน้ารายการจอง
+        </a>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- ปุ่มส่งใบเสร็จเข้าอีเมล -->
+            <form action="{{ url_for('send_receipt_to_email', booking_id=b['booking_id']) }}" method="POST" style="margin: 0; display: inline-flex;">
+                <button type="submit" class="action-btn email-btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                    <span>✉️</span> ส่งใบเสร็จเข้าอีเมล
+                </button>
+            </form>
+
+            <button type="button" class="action-btn print-btn" onclick="window.print()">
+                <span>🖨️</span> พิมพ์ใบเสร็จ (Print / PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- Flash Messages (ไม่แสดงเวลาพิมพ์) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="action-toolbar" style="margin-top: -10px; margin-bottom: 20px; padding: 12px 18px; border: none; background: transparent; box-shadow: none;">
+                {% for category, message in messages %}
+                    <div style="width: 100%; padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; text-align: center; {% if category == 'success' %}background: #f0fdf4; color: #166534; border: 1.5px solid #86efac;{% elif category == 'warning' %}background: #fffbeb; color: #b45309; border: 1.5px solid #fde68a;{% elif category == 'info' %}background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe;{% else %}background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- ตัวเอกสารใบเสร็จรับเงิน -->
+    <div class="receipt-container">
+
+        <!-- 1. ส่วนหัวเอกสารและข้อมูลร้านค้า -->
+        <header class="receipt-header">
+            <div class="shop-info">
+                <img
+                    src="{{ url_for('static', filename='images/cat-spa-logo.png') }}"
+                    alt="Cat Spa & Grooming"
+                    class="shop-logo"
+                    onerror="this.style.display='none';"
+                >
+                <div class="shop-title">
+                    <h1>Cat Spa & Grooming</h1>
+                    <p>
+                        📍 {{ shop_address }}<br>
+                        📞 โทรศัพท์ / พร้อมเพย์: {{ shop_promptpay }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="receipt-doc-meta">
+                <span class="receipt-badge-title">🧾 ใบเสร็จรับเงิน (RECEIPT)</span>
+                <div class="meta-row">
+                    เลขที่ใบเสร็จ: <strong>{{ receipt_no }}</strong>
+                </div>
+                <div class="meta-row">
+                    วันที่ออกเอกสาร: <strong>{{ today_date }}</strong>
+                </div>
+                <div class="meta-row">
+                    รหัสการจอง: <strong>#{{ b['booking_id'] }}</strong>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. ข้อมูลลูกค้าและน้องแมวที่รับบริการ -->
+        <section class="customer-cat-grid">
+            <div class="info-col">
+                <div class="info-col-title">👤 ข้อมูลลูกค้า (Customer)</div>
+                <p><strong>ชื่อ-นามสกุล:</strong> {{ b['customer_name'] }}</p>
+                <p><strong>เบอร์โทรศัพท์:</strong> {{ b['customer_phone'] }}</p>
+                {% if b['customer_email'] %}
+                    <p><strong>อีเมล:</strong> {{ b['customer_email'] }}</p>
+                {% endif %}
+                <p><strong>วันเวลานัดหมาย:</strong> {{ b['booking_date'] }} เวลา {{ b['booking_time'] }} น.</p>
+            </div>
+
+            <div class="info-col">
+                <div class="info-col-title">🐱 ข้อมูลน้องแมว (Pet Info)</div>
+                <p><strong>ชื่อน้องแมว:</strong> น้อง{{ b['cat_name'] }}</p>
+                <p><strong>สายพันธุ์:</strong> {{ b['breed'] or '-' }}</p>
+                <p><strong>เพศ:</strong> {{ b['gender'] or '-' }}</p>
+                <p><strong>ผู้ดูแลน้องแมว:</strong> {{ b['staff_name'] or 'ทีมงาน Cat Spa & Grooming' }}</p>
+                {% if b['notes'] %}
+                    <p><strong>หมายเหตุ:</strong> {{ b['notes'] }}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- 3. ตารางแจกแจงรายการค่าบริการ -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">ลำดับ</th>
+                    <th>รายการบริการ</th>
+                    <th style="width: 80px; text-align: center;">จำนวน</th>
+                    <th style="width: 140px;">ราคา (บาท)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- รายการที่ 1: บริการสปาแมว -->
+                <tr>
+                    <td style="text-align: center;">1</td>
+                    <td>
+                        <strong>✂️ {{ b['service_name'] }}</strong>
+                        <div class="item-subdesc">
+                            {{ b['service_description'] or 'บริการอาบน้ำ สปาบำรุงขน และดูแลความสะอาดสำหรับน้องแมว' }}
+                        </div>
+                    </td>
+                    <td style="text-align: center;">1</td>
+                    <td>{{ "{:,}".format(service_price) }}</td>
+                </tr>
+
+                <!-- รายการที่ 2: บริการรับ-ส่งน้องแมวถึงที่ (ถ้ามี) -->
+                {% if b['delivery_type'] and b['delivery_type'] != 'none' %}
+                <tr>
+                    <td style="text-align: center;">2</td>
+                    <td>
+                        <strong>🚗 บริการรับ-ส่งน้องแมวถึงที่บ้าน (Pet Taxi)</strong>
+                        <div class="item-subdesc">
+                            {% if b['delivery_type'] == 'round_trip' %}
+                                รับและส่งกลับ (ไป-กลับ)
+                            {% elif b['delivery_type'] == 'pickup_only' %}
+                                รับน้องมาส่งที่ร้านสปา (เที่ยวเดียว)
+                            {% elif b['delivery_type'] == 'dropoff_only' %}
+                                พาน้องส่งกลับบ้าน (เที่ยวเดียว)
+                            {% endif %}
+                            {% if b['distance_km'] %}
+                                • ระยะทางจากร้าน {{ "%.1f"|format(b['distance_km']) }} กม.
+                            {% endif %}
+                            {% if b['pickup_address'] %}
+                                <br>🏠 สถานที่: {{ b['pickup_address'] }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="text-align: center;">1</td>
+                    <td>{{ "{:,}".format(b['delivery_fee'] or 0) }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- 4. ส่วนสรุปยอดเงินรวมสุทธิ -->
+        <div class="totals-section">
+            <div class="totals-table">
+                <div class="totals-row">
+                    <span>ยอดรวมค่าบริการ (Subtotal):</span>
+                    <span>{{ "{:,}".format(b['price']) }} บาท</span>
+                </div>
+                <div class="totals-row">
+                    <span>ภาษีมูลค่าเพิ่ม / ส่วนลด:</span>
+                    <span>0 บาท</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>ยอดรวมสุทธิ (Grand Total):</span>
+                    <strong>{{ "{:,}".format(b['price']) }} บาท</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. กล่องรับรองการชำระเงินและตรวจสลิป (PAID BADGE) -->
+        <section class="payment-verification-box">
+            <div class="pay-meta-left">
+                <div class="pay-check-icon">✓</div>
+                <div class="pay-details">
+                    <h4>ชำระเงินเรียบร้อยแล้ว (PAID)</h4>
+                    <p>
+                        ช่องทาง: <strong>สแกน QR Code พร้อมเพย์</strong> ({{ shop_promptpay or '064-697-2101' }})<br>
+                        หลักฐานสลิป: ผ่านการตรวจสอบและยืนยันยอดเงินจากทางร้านเรียบร้อยแล้ว
+                        {% if b['slip_uploaded_at'] %}
+                            <br><span style="color: #64748b;">วันเวลาที่แนบสลิป: {{ b['slip_uploaded_at'] }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="paid-stamp">
+                <div class="paid-stamp-text">PAID</div>
+                <div class="paid-stamp-sub">CAT SPA VERIFIED</div>
+            </div>
+        </section>
+
+        <!-- 6. ท้ายเอกสารและลายเซ็น -->
+        <footer class="receipt-footer-grid">
+            <div class="footer-note">
+                <p>
+                    ♡ ขอบพระคุณที่ไว้วางใจให้ <strong>Cat Spa & Grooming</strong> ดูแลน้องแมวที่คุณรัก<br>
+                    เอกสารนี้ออกโดยระบบอัตโนมัติของร้าน Cat Spa & Grooming หลังยืนยันการรับชำระเงินเสร็จสมบูรณ์
+                </p>
+            </div>
+
+            <div class="footer-signature">
+                <div class="sign-line"></div>
+                <p style="font-weight: 700; font-size: 13px; color: #1e293b;">Cat Spa & Grooming</p>
+                <span class="sign-role">ผู้รับเงิน / พนักงานผู้ตรวจสอบ</span>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ยืนยันรหัส OTP | Cat Spa & Grooming</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .otp-input-box {
+            width: 100%;
+            padding: 16px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 14px;
+            text-align: center;
+            color: #d94771;
+            background: #fff8fa;
+            border: 2px solid #f6ccd8;
+            border-radius: 14px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+            transition: all 0.25s ease;
+        }
+
+        .otp-input-box:focus {
+            border-color: #e85d87;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(232, 93, 135, 0.15);
+            outline: none;
+        }
+
+        .otp-hint {
+            font-size: 13px;
+            color: #88727d;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .otp-resend-row {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px dashed #f6dbe4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-resend-link {
+            background: none;
+            border: none;
+            color: #e85d87;
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .btn-resend-link:hover {
+            color: #c2255c;
+        }
+
+        .cancel-reg-link {
+            font-size: 13px;
+            color: #88727d;
+            text-decoration: none;
+        }
+
+        .cancel-reg-link:hover {
+            color: #5a3b2c;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+
+<div class="auth-container">
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}" alt="Cat Spa & Grooming logo" class="auth-brand-logo">
+        </div>
+
+        <div style="font-size: 40px; text-align: center; margin-bottom: 6px;">
+            📧
+        </div>
+
+        <h1>ยืนยันรหัส OTP ทางอีเมล</h1>
+
+        <p class="auth-subtitle">
+            เราได้ส่งรหัสยืนยัน 6 หลักไปยังอีเมล<br>
+            <strong style="color: #e85d87; font-size: 15px;">{{ masked_email }}</strong>
+        </p>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {% if category == 'success' %}alert-success{% elif category == 'info' %}alert-info{% endif %}" style="{% if category == 'info' %}background: #fff0f5; color: #a61e4d; border: 1.5px dashed #f783ac;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('verify_otp') }}" method="POST">
+            <div class="form-group">
+                <label for="otp" style="text-align: center; display: block; font-weight: 700; color: #5a3b2c;">
+                    กรอกรหัส OTP (6 หลัก)
+                </label>
+
+                <input
+                    type="text"
+                    name="otp"
+                    id="otp"
+                    class="otp-input-box"
+                    maxlength="6"
+                    minlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    placeholder="••••••"
+                    required
+                    autofocus
+                >
+
+                <div class="otp-hint">
+                    ⏱️ รหัสยืนยันมีอายุการใช้งาน 10 นาที
+                </div>
+            </div>
+
+            <button type="submit" class="auth-button">
+                ✓ ยืนยันการสมัครสมาชิก
+            </button>
+        </form>
+
+        <div class="otp-resend-row">
+            <form action="{{ url_for('resend_otp') }}" method="POST" style="margin: 0;">
+                <button type="submit" class="btn-resend-link">
+                    🔄 ยังไม่ได้รับรหัส? ส่งรหัสใหม่
+                </button>
+            </form>
+
+            <a href="{{ url_for('register') }}" class="cancel-reg-link">
+                ← แก้ไขข้อมูล
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

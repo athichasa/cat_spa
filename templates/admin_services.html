@@ -1,0 +1,169 @@
+{% extends "admin_base.html" %}
+
+{% block title %}จัดการบริการและราคา | Cat Spa Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>✂️ จัดการบริการและราคา</h1>
+        <p>เพิ่มแพ็กเกจใหม่ ปรับราคา เปิดหรือปิดการขาย และลบบริการที่ไม่ต้องการ</p>
+    </div>
+    <div class="header-actions">
+        <a href="#new-service-form" class="admin-btn admin-btn-primary">
+            ➕ เพิ่มบริการใหม่
+        </a>
+    </div>
+</div>
+
+<!-- ฟอร์มเพิ่มบริการใหม่ -->
+<div class="admin-card" id="new-service-form">
+    <div class="admin-card-header">
+        <h2>➕ เพิ่มบริการและแพ็กเกจใหม่</h2>
+        <span style="font-size: 13px; color: #88727d;">กรอกข้อมูลคอร์สใหม่เพื่อเปิดให้บริการลูกค้า</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_services') }}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <div class="admin-form-group" style="margin-bottom: 0;">
+                <label for="category">หมวดหมู่บริการ *</label>
+                <select name="category" id="category" class="admin-form-control" required>
+                    <option value="อาบน้ำแมว">🛁 อาบน้ำแมว</option>
+                    <option value="สปาแมว">🧴 สปาแมว</option>
+                    <option value="ตัดแต่งขน">✂️ ตัดแต่งขน</option>
+                    <option value="ตัดเล็บ">🐾 ตัดเล็บ</option>
+                </select>
+            </div>
+
+            <div class="admin-form-group" style="margin-bottom: 0;">
+                <label for="service_name">ชื่อแพ็กเกจ / คอร์ส *</label>
+                <input type="text" name="service_name" id="service_name" class="admin-form-control" placeholder="เช่น สปาบำรุงขนสูตรออร์แกนิก" required>
+            </div>
+
+            <div class="admin-form-group" style="margin-bottom: 0;">
+                <label for="price">ราคา (บาท) *</label>
+                <input type="number" name="price" id="price" min="0" step="1" class="admin-form-control" placeholder="เช่น 500" required>
+            </div>
+        </div>
+
+        <div class="admin-form-group">
+            <label for="description">รายละเอียดการให้บริการ</label>
+            <textarea name="description" id="description" rows="2" class="admin-form-control" placeholder="ระบุสิ่งที่รวมในบริการ เช่น อาบน้ำ บำรุงขน เป่าขน และหวีสางขนให้เรียบร้อย"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="admin-btn admin-btn-primary">
+                + บันทึกเพิ่มบริการ
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- ตัวกรองหมวดหมู่และค้นหา -->
+<div class="admin-filter-bar">
+    <div class="filter-pills">
+        <a href="{{ url_for('admin_services', category='all', q=keyword) }}"
+           class="filter-pill {% if current_category == 'all' or not current_category %}active{% endif %}">
+            ทั้งหมด
+        </a>
+        {% for cat in categories %}
+            <a href="{{ url_for('admin_services', category=cat, q=keyword) }}"
+               class="filter-pill {% if current_category == cat %}active{% endif %}">
+                {% if cat == 'อาบน้ำแมว' %}🛁{% elif cat == 'สปาแมว' %}🧴{% elif cat == 'ตัดแต่งขน' %}✂️{% elif cat == 'ตัดเล็บ' %}🐾{% endif %}
+                {{ cat }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <form method="GET" action="{{ url_for('admin_services') }}" class="filter-search-form">
+        {% if current_category and current_category != 'all' %}
+            <input type="hidden" name="category" value="{{ current_category }}">
+        {% endif %}
+        <input type="text" name="q" value="{{ keyword }}" placeholder="ค้นหาชื่อบริการหรือรายละเอียด..." class="admin-input" style="width: 220px;">
+        <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm">
+            🔍 ค้นหา
+        </button>
+        {% if keyword or (current_category and current_category != 'all') %}
+            <a href="{{ url_for('admin_services') }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                ✕ ล้าง
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- รายการบริการแบบการ์ดกริด -->
+{% if services %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+        {% for s in services %}
+        <div style="background: white; border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 22px; box-shadow: var(--admin-shadow); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s;">
+            
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: #fff0f5; color: #e85d87; border: 1px solid #f9d8e4;">
+                        {% if s['category'] == 'อาบน้ำแมว' %}🛁{% elif s['category'] == 'สปาแมว' %}🧴{% elif s['category'] == 'ตัดแต่งขน' %}✂️{% elif s['category'] == 'ตัดเล็บ' %}🐾{% endif %}
+                        {{ s['category'] }}
+                    </span>
+
+                    {% if s['is_active'] %}
+                        <span style="font-size: 12.5px; font-weight: 700; color: #15803d; background: #dcfce7; padding: 3px 9px; border-radius: 12px;">
+                            ● เปิดให้บริการ
+                        </span>
+                    {% else %}
+                        <span style="font-size: 12.5px; font-weight: 700; color: #b91c1c; background: #fee2e2; padding: 3px 9px; border-radius: 12px;">
+                            ○ ปิดบริการ
+                        </span>
+                    {% endif %}
+                </div>
+
+                <h3 style="font-size: 18px; font-weight: 800; color: #3d3136; margin-bottom: 8px;">
+                    {{ s['service_name'] }}
+                </h3>
+
+                <p style="font-size: 13.5px; color: #7f6e76; line-height: 1.6; margin-bottom: 16px; min-height: 42px;">
+                    {{ s['description'] or 'ไม่มีรายละเอียดเพิ่มเติม' }}
+                </p>
+            </div>
+
+            <div>
+                <div style="border-top: 1px solid #f6e8ee; padding-top: 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: baseline;">
+                    <span style="font-size: 13px; color: #88727d;">อัตราค่าบริการ:</span>
+                    <span style="font-size: 22px; font-weight: 800; color: #e85d87;">
+                        {{ "{:,}".format(s['price']) }} <span style="font-size: 14px; font-weight: 600;">บาท</span>
+                    </span>
+                </div>
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{{ url_for('edit_service', service_id=s['service_id']) }}" class="admin-btn admin-btn-outline-primary admin-btn-sm" style="flex: 1; justify-content: center;">
+                        ✏️ แก้ไข
+                    </a>
+
+                    <form method="POST" action="{{ url_for('toggle_service', service_id=s['service_id']) }}" style="display: inline; flex: 1;">
+                        <button type="submit" class="admin-btn {% if s['is_active'] %}admin-btn-warning{% else %}admin-btn-success{% endif %} admin-btn-sm" style="width: 100%; justify-content: center;">
+                            {% if s['is_active'] %}⏸️ ปิดบริการ{% else %}▶️ เปิดบริการ{% endif %}
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{{ url_for('delete_service', service_id=s['service_id']) }}" style="display: inline;" onsubmit="return confirm('ยืนยันที่จะลบบริการ \'{{ s['service_name'] }}\' ออกจากระบบหรือไม่?')">
+                        <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm" title="ลบบริการ">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="admin-empty-state">
+        <div class="admin-empty-icon">✂️</div>
+        <h3>ไม่พบรายการบริการ</h3>
+        <p>ไม่มีบริการตรงตามคำค้นหาหรือหมวดหมู่ที่เลือก</p>
+        <div style="margin-top: 15px;">
+            <a href="{{ url_for('admin_services') }}" class="admin-btn admin-btn-primary admin-btn-sm">
+                แสดงบริการทั้งหมด
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

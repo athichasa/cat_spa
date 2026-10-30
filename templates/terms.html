@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อกำหนดการใช้บริการ | Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            background: #fff8f3;
+            color: #44372f;
+            font-family: 'Kanit', Arial, Tahoma, sans-serif;
+            line-height: 1.8;
+        }
+
+        .policy-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 38px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(112, 70, 51, 0.08);
+            border: 1px solid #f6dedc;
+        }
+
+        .policy-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .policy-header .logo-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .policy-header img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            box-shadow: 0 4px 14px rgba(240, 93, 135, 0.15);
+        }
+
+        .policy-header h1 {
+            color: #704735;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .policy-header p {
+            color: #8c7870;
+            margin-top: 0;
+            font-size: 15px;
+        }
+
+        .policy-section {
+            margin-bottom: 28px;
+        }
+
+        .policy-section h2 {
+            color: #f05d87;
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .policy-section p {
+            color: #634b43;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .policy-section ul {
+            padding-left: 24px;
+            color: #634b43;
+            font-size: 14.5px;
+        }
+
+        .policy-section li {
+            margin-bottom: 8px;
+        }
+
+        .policy-note {
+            background: #fff0f4;
+            border-left: 4px solid #f05d87;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-size: 14.5px;
+            color: #704735;
+        }
+
+        .policy-footer {
+            text-align: center;
+            border-top: 1px solid #f4e1e5;
+            padding-top: 25px;
+            margin-top: 35px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(240, 93, 135, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(240, 93, 135, 0.35);
+        }
+
+        .secondary-back {
+            background: #fff;
+            color: #704735 !important;
+            border: 1.5px solid #f4dbe0;
+            box-shadow: none;
+        }
+
+        .secondary-back:hover {
+            background: #fff5f7;
+            border-color: #f05d87;
+        }
+
+        @media (max-width: 600px) {
+            .policy-container {
+                margin: 15px;
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="policy-container">
+    <div class="policy-header">
+        <div class="logo-wrap">
+            <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}" alt="Cat Spa Logo">
+        </div>
+        <h1>ข้อกำหนดการใช้บริการ</h1>
+        <p>Cat Spa & Grooming — ข้อตกลงและเงื่อนไขการให้บริการเพื่อความปลอดภัยของน้องแมว</p>
+    </div>
+
+    <div class="policy-note">
+        🐾 เพื่อสุขอนามัยและความปลอดภัยสูงสุดของน้องแมวทุกตัว กรุณาอ่านและทำความเข้าใจข้อกำหนดการใช้บริการก่อนทำการลงทะเบียนและจองคิว
+    </div>
+
+    <section class="policy-section">
+        <h2>🐾 1. การสมัครสมาชิกและบัญชีผู้ใช้งาน</h2>
+        <p>ผู้ใช้บริการตกลงและยินยอมปฏิบัติตามเงื่อนไขดังต่อไปนี้:</p>
+        <ul>
+            <li>ผู้ใช้งานต้องให้ข้อมูลที่เป็นจริง ถูกต้อง และเป็นปัจจุบันในการลงทะเบียน</li>
+            <li>ผู้ใช้งานมีหน้าที่รักษาความลับของรหัสผ่านและข้อมูลบัญชีของตนเอง</li>
+            <li>ห้ามใช้บัญชีของผู้อื่นโดยไม่ได้รับอนุญาต หรือกระทำการใดๆ ที่อาจส่งผลกระทบต่อระบบของร้าน</li>
+        </ul>
+    </section>
+
+    <section class="policy-section">
+        <h2>🛁 2. การจองคิวและเงื่อนไขการให้บริการ</h2>
+        <ul>
+            <li>การจองคิวบริการต้องทำผ่านระบบออนไลน์ล่วงหน้า โดยระบุวันที่และเวลาที่ต้องการอย่างชัดเจน</li>
+            <li>คิวการจองจะสมบูรณ์เมื่อได้รับการยืนยันสถานะ "ยืนยันแล้ว" จากทางร้าน</li>
+            <li>กรุณานำน้องแมวมาถึงร้านก่อนเวลานัดหมายอย่างน้อย 10-15 นาที เพื่อตรวจสภาพร่างกายและขนเบื้องต้น</li>
+            <li>หากมาช้ากว่าเวลานัดหมายเกิน 20 นาที ทางร้านขอสงวนสิทธิ์ในการปรับลดขั้นตอนหรือเลื่อนคิวตามความเหมาะสม เพื่อไม่ให้กระทบต่อคิวถัดไป</li>
+        </ul>
+    </section>
+
+    <section class="policy-section">
+        <h2>🐱 3. สุขภาพและความปลอดภัยของน้องแมว</h2>
+        <ul>
+            <li>น้องแมวต้องได้รับวัคซีนพื้นฐานตามเกณฑ์ และมีสุขภาพทั่วไปแข็งแรง ไม่เป็นโรคร้ายแรงหรือโรคติดต่อ</li>
+            <li>หากน้องแมวมีประวัติการแพ้ แผลผ่าตัด หรือมีนิสัยตื่นกลัวเป็นพิเศษ เจ้าของต้องแจ้งทีมงานทราบล่วงหน้า</li>
+            <li>กรณีที่น้องแมวมีเห็บ หมัด หรือเชื้อรา ทางร้านจะแนะนำให้รับบริการแพ็กเกจดูแลเฉพาะเพื่อป้องกันการแพร่กระจาย</li>
+            <li>หากน้องแมวมีอาการเครียด ก้าวร้าว หรือเสี่ยงต่ออันตราย ทีมงานอาจหยุดพักหรือยุติการให้บริการชั่วคราวเพื่อความปลอดภัยของตัวน้องเอง</li>
+        </ul>
+    </section>
+
+    <section class="policy-section">
+        <h2>⏰ 4. การเลื่อนและยกเลิกการจอง</h2>
+        <ul>
+            <li>ลูกค้าสามารถขอยกเลิกหรือเลื่อนวันนัดหมายได้ล่วงหน้าอย่างน้อย 24 ชั่วโมงก่อนถึงเวลานัด</li>
+            <li>หากต้องการเปลี่ยนแปลงข้อมูลบริการ สามารถติดต่อทางร้านผ่านช่องทางติดต่อหรือระบบสมาชิก</li>
+        </ul>
+    </section>
+
+    <section class="policy-section">
+        <h2>♡ 5. ความรับผิดชอบและการดูแล</h2>
+        <p>
+            ทีมงาน Cat Spa & Grooming ทุกคนผ่านการฝึกอบรมการดูแลน้องแมวอย่างอ่อนโยนและใส่ใจในทุกขั้นตอน
+            ร้านจะดูแลน้องแมวของคุณเสมือนสมาชิกในครอบครัว ด้วยผลิตภัณฑ์ที่ได้มาตรฐานและปลอดภัยต่อสัตว์เลี้ยง 100%
+        </p>
+    </section>
+
+    <div class="policy-footer">
+        <a href="{{ url_for('register') }}" class="back-button" onclick="if(window.history.length > 1){event.preventDefault(); window.history.back();}">
+            ✓ กลับไปหน้าสมัครสมาชิก
+        </a>
+        <a href="{{ url_for('home') }}" class="back-button secondary-back">
+            ← กลับหน้าหลัก
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

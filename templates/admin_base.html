@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ผู้ดูแลระบบ | Cat Spa & Grooming{% endblock %}</title>
+
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-body">
+
+    <!-- ================= ADMIN NAVBAR ================= -->
+    <header class="admin-navbar">
+        <div class="admin-nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-brand">
+                <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}" alt="Cat Spa & Grooming logo" class="admin-brand-logo">
+                <span>Cat Spa</span>
+                <span class="brand-badge">Admin Portal</span>
+            </a>
+
+            <nav class="admin-nav-menu">
+                <a href="{{ url_for('admin_dashboard') }}"
+                   class="admin-nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                    📊 ภาพรวม
+                </a>
+                <a href="{{ url_for('admin_bookings') }}"
+                   class="admin-nav-link {% if request.endpoint == 'admin_bookings' %}active{% endif %}">
+                    📅 จัดการการจอง
+                </a>
+                <a href="{{ url_for('admin_staff') }}"
+                   class="admin-nav-link {% if request.endpoint in ['admin_staff', 'admin_staff_edit'] %}active{% endif %}">
+                    👩‍💼 จัดการพนักงาน
+                </a>
+                <a href="{{ url_for('admin_reviews') }}"
+                   class="admin-nav-link {% if request.endpoint == 'admin_reviews' %}active{% endif %}">
+                    ⭐ รีวิวลูกค้า
+                </a>
+                <a href="{{ url_for('admin_services') }}"
+                   class="admin-nav-link {% if request.endpoint in ['admin_services', 'edit_service'] %}active{% endif %}">
+                    ✂️ จัดการคอร์สบริการ
+                </a>
+                <a href="{{ url_for('admin_members') }}"
+                   class="admin-nav-link {% if request.endpoint in ['admin_members', 'admin_member_detail'] %}active{% endif %}">
+                    👥 จัดการสมาชิก
+                </a>
+                <a href="{{ url_for('admin_history') }}"
+                   class="admin-nav-link {% if request.endpoint == 'admin_history' %}active{% endif %}">
+                    📚 ประวัติและรายได้
+                </a>
+            </nav>
+
+            <div class="admin-nav-right">
+                <a href="{{ url_for('home') }}" class="admin-btn-outline" target="_blank" title="เปิดหน้าเว็บไซต์หลัก">
+                    🌐 ดูหน้าร้าน
+                </a>
+                <div class="admin-user-pill">
+                    👤 {{ session.get('name', 'Admin') }}
+                </div>
+                <a href="{{ url_for('logout') }}" class="admin-btn-outline" title="ออกจากระบบ">
+                    🚪 ออกจากระบบ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="admin-main">
+
+        <!-- Flashed Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="admin-alerts">
+                    {% for category, message in messages %}
+                        <div class="admin-alert {% if category in ['error', 'danger'] %}alert-danger{% elif category == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                            <span>
+                                {% if category == 'success' %}✅{% elif category in ['error', 'danger'] %}⚠️{% else %}ℹ️{% endif %}
+                            </span>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="admin-footer">
+        <p>🐱 Cat Spa & Grooming - ระบบผู้ดูแลร้าน (Admin Portal) &copy; 2026. All Rights Reserved.</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

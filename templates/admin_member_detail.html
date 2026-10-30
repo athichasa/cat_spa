@@ -1,0 +1,232 @@
+{% extends "admin_base.html" %}
+
+{% block title %}รายละเอียดสมาชิก: {{ member['name'] }} | Cat Spa Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>👤 รายละเอียดข้อมูลสมาชิก</h1>
+        <p>ตรวจสอบข้อมูลส่วนตัว น้องแมวที่ลงทะเบียน และประวัติการจองของ {{ member['name'] }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin_members') }}" class="admin-btn admin-btn-outline-primary">
+            ← กลับสู่รายชื่อสมาชิก
+        </a>
+    </div>
+</div>
+
+<!-- การ์ดข้อมูลลูกค้า -->
+<div class="admin-card" style="margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 18px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #ffe4ee; color: #e85d87; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800;">
+                {{ member['name'][:1] }}
+            </div>
+            <div>
+                <h2 style="font-size: 22px; font-weight: 800; color: #3d3136; margin-bottom: 4px;">
+                    {{ member['name'] }}
+                </h2>
+                <div style="font-size: 13.5px; color: #7f6e76;">
+                    รหัสสมาชิก: #{{ member['user_id'] }} • สมัครสมาชิกเมื่อ: {{ member['created_at'] or '-' }}
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+            <div>
+                <div style="font-size: 12.5px; color: #88727d; font-weight: 600;">เบอร์โทรศัพท์</div>
+                <div style="font-size: 16px; font-weight: 700;">
+                    {% if member['phone'] %}
+                        <a href="tel:{{ member['phone'] }}" style="color: #e85d87; text-decoration: none;">
+                            📞 {{ member['phone'] }}
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div style="font-size: 12.5px; color: #88727d; font-weight: 600;">อีเมล</div>
+                <div style="font-size: 16px; font-weight: 700;">
+                    {% if member['email'] %}
+                        <a href="mailto:{{ member['email'] }}" style="color: #55444b; text-decoration: none;">
+                            ✉️ {{ member['email'] }}
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div style="font-size: 12.5px; color: #88727d; font-weight: 600;">ยอดใช้จ่ายสำเร็จ</div>
+                <div style="font-size: 18px; font-weight: 800; color: #15803d;">
+                    {{ "{:,}".format(completed_spent) }} บาท
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- น้องแมวของสมาชิก -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2>🐱 น้องแมวที่ลงทะเบียน ({{ cats|length }} ตัว)</h2>
+    </div>
+
+    {% if cats %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px;">
+            {% for cat in cats %}
+            <div style="background: #fffafc; border: 1px solid #f6e4ec; border-radius: 16px; padding: 18px; display: flex; gap: 16px; align-items: flex-start;">
+                <div>
+                    {% if cat['image'] %}
+                        <img src="{{ url_for('uploaded_cat_image', filename=cat['image']) }}" alt="{{ cat['cat_name'] }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e85d87;">
+                    {% else %}
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #ffe4ee; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                            🐱
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div style="flex: 1;">
+                    <h3 style="font-size: 17px; font-weight: 800; color: #3d3136; margin-bottom: 4px;">
+                        น้อง{{ cat['cat_name'] }}
+                    </h3>
+                    <div style="font-size: 13px; color: #7f6e76; margin-bottom: 2px;">
+                        <strong>สายพันธุ์:</strong> {{ cat['breed'] or '-' }}
+                    </div>
+                    <div style="font-size: 13px; color: #7f6e76; margin-bottom: 2px;">
+                        <strong>เพศ:</strong> {{ cat['gender'] or '-' }} • <strong>อายุ:</strong> {{ cat['age'] if cat['age'] is not none else '-' }} ปี
+                    </div>
+                    <div style="font-size: 13px; color: #7f6e76; margin-bottom: 2px;">
+                        <strong>น้ำหนัก:</strong> {{ cat['weight'] if cat['weight'] is not none else '-' }} กก. • <strong>ขน:</strong> {{ cat['coat_type'] or '-' }}
+                    </div>
+                    {% if cat['notes'] %}
+                        <div style="font-size: 12px; color: #9a3412; background: #fff8f0; border: 1px solid #fed7aa; border-radius: 8px; padding: 6px 10px; margin-top: 8px;">
+                            💬 {{ cat['notes'] }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 30px; color: #88727d;">
+            สมาชิกท่านนี้ยังไม่ได้เพิ่มข้อมูลน้องแมวในระบบ
+        </div>
+    {% endif %}
+</div>
+
+<!-- ประวัติการจองของสมาชิก -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2>📅 ประวัติการจองคิวทั้งหมด ({{ bookings|length }} รายการ)</h2>
+    </div>
+
+    {% if bookings %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>รหัสจอง</th>
+                        <th>น้องแมว</th>
+                        <th>บริการ</th>
+                        <th>วันและเวลานัดหมาย</th>
+                        <th>ราคา</th>
+                        <th>สถานะ</th>
+                        <th>หมายเหตุ</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td><strong>#{{ b['booking_id'] }}</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        {% if b['cat_image'] %}
+                                            <a href="{{ url_for('uploaded_cat_image', filename=b['cat_image']) }}" target="_blank" title="คลิกดูรูปเต็ม">
+                                                <img src="{{ url_for('uploaded_cat_image', filename=b['cat_image']) }}" alt="{{ b['cat_name'] }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e85d87;">
+                                            </a>
+                                        {% endif %}
+                                        <span>น้อง{{ b['cat_name'] or '-' }}</span>
+                                    </div>
+                                </td>
+                        <td>
+                            <strong>{{ b['service_name'] }}</strong>
+                            {% if b['service_description'] %}
+                                <div style="font-size: 12px; color: #7f6e76;">{{ b['service_description'] }}</div>
+                            {% endif %}
+                            {% if b['delivery_type'] and b['delivery_type'] != 'none' %}
+                                <div style="font-size: 11.5px; color: #c2255c; margin-top: 3px;">
+                                    🚗 รับ-ส่ง (+{{ "{:,}".format(b['delivery_fee']) }}฿)
+                                    {% if b['latitude'] and b['longitude'] %}
+                                        • <a href="https://www.google.com/maps?q={{ b['latitude'] }},{{ b['longitude'] }}" target="_blank" style="color: #2b8a3e; text-decoration: none;">🗺️ แผนที่</a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            📅 {{ b['booking_date'] }}<br>
+                            <span style="font-size: 12.5px; color: #88727d;">🕒 {{ b['booking_time'] }} น.</span>
+                        </td>
+                        <td>
+                            <strong style="color: #e85d87;">{{ "{:,}".format(b['price']) }} ฿</strong>
+                            <div style="font-size: 11px; margin-top: 3px;">
+                                {% if b['payment_method'] == 'qr_code' %}
+                                    <span style="color: #0284c7;">📱 QR พร้อมเพย์</span>
+                                    {% if b['payment_slip'] %}
+                                        • <a href="{{ url_for('uploaded_payment_slip', filename=b['payment_slip']) }}" target="_blank" style="color: #0284c7;">สลิป</a>
+                                    {% endif %}
+                                {% else %}
+                                    <span style="color: #92400e;">💵 จ่ายหน้าร้าน</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if b['status'] == 'รอยืนยัน' %}
+                                <span class="admin-badge badge-pending">⏳ รอยืนยัน</span>
+                            {% elif b['status'] == 'ยืนยันแล้ว' %}
+                                <span class="admin-badge badge-confirmed">✅ ยืนยันแล้ว</span>
+                            {% elif b['status'] == 'เสร็จสิ้น' %}
+                                <span class="admin-badge badge-completed">🏁 เสร็จสิ้น</span>
+                            {% else %}
+                                <span class="admin-badge badge-rejected">❌ {{ b['status'] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="font-size: 12.5px; color: #7f6e76;">{{ b['notes'] or '-' }}</span>
+                        </td>
+                        <td>
+                            {% if b['status'] == 'รอยืนยัน' %}
+                                <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b['booking_id']) }}" style="display:inline;">
+                                    <input type="hidden" name="status" value="ยืนยันแล้ว">
+                                    <button type="submit" class="admin-btn admin-btn-success admin-btn-sm" onclick="return confirm('ยืนยันคิวนี้หรือไม่?')">
+                                        ✓ รับคิว
+                                    </button>
+                                </form>
+                            {% elif b['status'] == 'ยืนยันแล้ว' %}
+                                <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b['booking_id']) }}" style="display:inline;">
+                                    <input type="hidden" name="status" value="เสร็จสิ้น">
+                                    <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm" onclick="return confirm('บันทึกว่าเสร็จสิ้นแล้วหรือไม่?')">
+                                        ✓ เสร็จสิ้น
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span style="font-size: 12.5px; color: #88727d;">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 30px; color: #88727d;">
+            สมาชิกท่านนี้ยังไม่มีประวัติการจองคิว
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "admin_base.html" %}
+
+{% block title %}ประวัติการใช้บริการและรายได้ | Cat Spa Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>📚 ประวัติการใช้บริการและรายได้</h1>
+        <p>ตรวจสอบรายการที่ให้บริการเสร็จสิ้นสมบูรณ์ พร้อมสรุปยอดรายรับและสถิติการให้บริการ</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin_bookings') }}" class="admin-btn admin-btn-outline-primary">
+            📅 กลับไปจัดการคิวปัจจุบัน
+        </a>
+    </div>
+</div>
+
+<!-- สรุปสถิติ 3 การ์ด -->
+<section class="admin-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+    <div class="admin-stat-card stat-revenue">
+        <div class="stat-info">
+            <h3>💰 ยอดรายรับรวมที่สำเร็จ</h3>
+            <div class="stat-number">{{ "{:,}".format(revenue) }} <span style="font-size: 15px; font-weight: normal;">บาท</span></div>
+            <div class="stat-desc">จากคิวที่ให้บริการเสร็จสิ้น</div>
+        </div>
+        <div class="stat-icon">💵</div>
+    </div>
+
+    <div class="admin-stat-card stat-completed">
+        <div class="stat-info">
+            <h3>🏁 จำนวนคิวที่สำเร็จ</h3>
+            <div class="stat-number">{{ history|length }} <span style="font-size: 15px; font-weight: normal;">รายการ</span></div>
+            <div class="stat-desc">ผ่านการดูแลเรียบร้อยแล้ว</div>
+        </div>
+        <div class="stat-icon">✨</div>
+    </div>
+
+    <div class="admin-stat-card stat-confirmed">
+        <div class="stat-info">
+            <h3>📊 ยอดเฉลี่ยต่อคิว</h3>
+            <div class="stat-number">{{ "{:,.0f}".format(avg_price) }} <span style="font-size: 15px; font-weight: normal;">บาท</span></div>
+            <div class="stat-desc">เฉลี่ยต่อการเข้ารับบริการ</div>
+        </div>
+        <div class="stat-icon">📈</div>
+    </div>
+</section>
+
+<!-- ตัวกรองวันที่และค้นหา -->
+<div class="admin-filter-bar">
+    <div style="font-weight: 700; font-size: 14px; color: #55444b;">
+        🔍 ค้นหาและกรองประวัติ
+    </div>
+
+    <form method="GET" action="{{ url_for('admin_history') }}" class="filter-search-form">
+        <label style="font-size: 13px; font-weight: 600; color: #7f6e76;">ตั้งแต่วันที่:</label>
+        <input type="date" name="date_from" value="{{ date_from }}" class="admin-input" title="ตั้งแต่วันที่">
+
+        <label style="font-size: 13px; font-weight: 600; color: #7f6e76;">ถึง:</label>
+        <input type="date" name="date_to" value="{{ date_to }}" class="admin-input" title="ถึงวันที่">
+
+        <input type="text" name="q" value="{{ keyword }}" placeholder="ค้นหาชื่อลูกค้า, แมว, บริการ..." class="admin-input" style="width: 220px;">
+
+        <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm">
+            ค้นหา
+        </button>
+
+        {% if keyword or date_from or date_to %}
+            <a href="{{ url_for('admin_history') }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                ✕ ล้างตัวกรอง
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- ตารางประวัติการบริการ -->
+{% if history %}
+    <div class="admin-card" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive" style="border: none; border-radius: 0;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>รหัส</th>
+                        <th>วันที่ & เวลา</th>
+                        <th>ลูกค้า</th>
+                        <th>น้องแมว</th>
+                        <th>บริการ</th>
+                        <th style="text-align: right;">ราคา</th>
+                        <th style="text-align: center;">สถานะ</th>
+                        <th>หมายเหตุ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td><strong>#{{ item['booking_id'] }}</strong></td>
+                        <td>
+                            📅 {{ item['booking_date'] }}<br>
+                            <span style="font-size: 12.5px; color: #88727d;">🕒 {{ item['booking_time'] }} น.</span>
+                        </td>
+                        <td>
+                            <strong style="color: #3d3136;">{{ item['customer_name'] }}</strong>
+                            {% if item['customer_phone'] %}
+                                <div style="font-size: 12.5px; color: #e85d87;">📞 {{ item['customer_phone'] }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                {% if item['cat_image'] %}
+                                    <a href="{{ url_for('uploaded_cat_image', filename=item['cat_image']) }}" target="_blank" title="คลิกดูรูปเต็ม">
+                                        <img src="{{ url_for('uploaded_cat_image', filename=item['cat_image']) }}" alt="{{ item['cat_name'] }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e85d87;">
+                                    </a>
+                                {% endif %}
+                                <span>น้อง{{ item['cat_name'] or '-' }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ item['service_name'] }}</strong>
+                            {% if item['service_description'] %}
+                                <div style="font-size: 12px; color: #7f6e76;">{{ item['service_description'] }}</div>
+                            {% endif %}
+                            {% if item['delivery_type'] and item['delivery_type'] != 'none' %}
+                                <div style="font-size: 11.5px; color: #c2255c; margin-top: 3px;">
+                                    🚗 รับ-ส่ง (+{{ "{:,}".format(item['delivery_fee']) }}฿)
+                                    {% if item['latitude'] and item['longitude'] %}
+                                        • <a href="https://www.google.com/maps?q={{ item['latitude'] }},{{ item['longitude'] }}" target="_blank" style="color: #2b8a3e; text-decoration: none;">🗺️ แผนที่</a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <strong style="color: #15803d; font-size: 15px;">
+                                {{ "{:,}".format(item['price']) }} ฿
+                            </strong>
+                            <div style="font-size: 11px; margin-top: 3px;">
+                                {% if item['payment_method'] == 'qr_code' %}
+                                    <span style="color: #0284c7;">📱 QR พร้อมเพย์</span>
+                                    {% if item['payment_slip'] %}
+                                        • <a href="{{ url_for('uploaded_payment_slip', filename=item['payment_slip']) }}" target="_blank" style="color: #0284c7;">ดูสลิป</a>
+                                    {% endif %}
+                                    • <a href="{{ url_for('print_receipt', booking_id=item['booking_id']) }}" target="_blank" style="color: #16a34a; font-weight: 700;">ใบเสร็จ</a>
+                                {% else %}
+                                    <span style="color: #92400e;">💵 จ่ายหน้าร้าน</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="admin-badge badge-completed">
+                                ✓ เสร็จสิ้น
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size: 12.5px; color: #7f6e76;">{{ item['notes'] or '-' }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="admin-empty-state">
+        <div class="admin-empty-icon">📚</div>
+        <h3>ไม่พบประวัติการใช้บริการที่เสร็จสิ้น</h3>
+        <p>{% if keyword or date_from or date_to %}ลองปรับช่วงวันที่หรือคำค้นหาใหม่{% else %}เมื่อแอดมินบันทึกคิวว่าให้บริการเสร็จสิ้น รายการจะแสดงที่หน้านี้{% endif %}</p>
+        {% if keyword or date_from or date_to %}
+            <div style="margin-top: 15px;">
+                <a href="{{ url_for('admin_history') }}" class="admin-btn admin-btn-primary admin-btn-sm">
+                    แสดงประวัติทั้งหมด
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

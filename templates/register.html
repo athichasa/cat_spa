@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิก | Cat Spa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20261026">
+
+    <style>
+        /* ซ่อนปุ่มเปิด/ปิดรหัสผ่านเริ่มต้นของเบราว์เซอร์ Edge / Windows ไม่ให้แสดงซ้อนกับปุ่มของระบบ */
+        .password-field-wrapper input::-ms-reveal,
+        .password-field-wrapper input::-ms-clear,
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            pointer-events: none !important;
+        }
+        input::-webkit-credentials-auto-fill-button {
+            visibility: hidden !important;
+            position: absolute !important;
+            right: 0 !important;
+        }
+
+        /* Modal Overlay & Dialog Styles สำหรับเปิดดูข้อกำหนด/นโยบาย */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(40, 25, 30, 0.65);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 16px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-dialog {
+            background: #ffffff;
+            width: 100%;
+            max-width: 680px;
+            max-height: 88vh;
+            border-radius: 20px;
+            box-shadow: 0 16px 45px rgba(60, 25, 35, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.92) translateY(16px);
+            animation: modalPopAnim 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border: 1.5px solid #f6dedc;
+        }
+        @keyframes modalPopAnim {
+            to {
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal-header {
+            padding: 18px 24px;
+            background: #fff8f9;
+            border-bottom: 1.5px solid #f5dfe4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .modal-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-title-wrap h3 {
+            margin: 0;
+            font-size: 19px;
+            color: #704735;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .modal-close-btn {
+            background: #ffffff;
+            border: 1px solid #ebd5db;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            color: #8c7870;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+        .modal-close-btn:hover {
+            background: #f05d87;
+            color: #ffffff;
+            border-color: #f05d87;
+            transform: rotate(90deg);
+        }
+        .modal-body {
+            padding: 22px 26px;
+            overflow-y: auto;
+            font-size: 14.5px;
+            line-height: 1.75;
+            color: #55443d;
+            max-height: calc(88vh - 145px);
+            scrollbar-width: thin;
+            scrollbar-color: #f3b1c3 #fdf2f4;
+        }
+        .modal-body::-webkit-scrollbar {
+            width: 7px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: #fdf2f4;
+            border-radius: 8px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #f3b1c3;
+            border-radius: 8px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #f05d87;
+        }
+        .modal-body h4 {
+            font-size: 15.5px;
+            color: #f05d87;
+            margin: 18px 0 8px 0;
+            font-weight: 700;
+        }
+        .modal-body h4:first-child {
+            margin-top: 0;
+        }
+        .modal-body p {
+            margin: 0 0 12px 0;
+            color: #5e4840;
+        }
+        .modal-body ul {
+            margin: 0 0 16px 0;
+            padding-left: 22px;
+        }
+        .modal-body li {
+            margin-bottom: 6px;
+        }
+        .modal-note-box {
+            background: #fff3f6;
+            border-left: 4px solid #f05d87;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 13.5px;
+            color: #704735;
+            line-height: 1.6;
+        }
+        .modal-footer {
+            padding: 14px 24px;
+            background: #faf6f4;
+            border-top: 1.5px solid #f2e2e0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+        .modal-btn-secondary {
+            background: #ffffff;
+            color: #704735;
+            border: 1.5px solid #e5d2cc;
+        }
+        .modal-btn-secondary:hover {
+            background: #f7ebe7;
+        }
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(240, 93, 135, 0.3);
+        }
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(240, 93, 135, 0.4);
+        }
+        @media (max-width: 600px) {
+            .modal-dialog {
+                max-height: 92vh;
+                border-radius: 16px;
+            }
+            .modal-header {
+                padding: 14px 18px;
+            }
+            .modal-title-wrap h3 {
+                font-size: 17px;
+            }
+            .modal-body {
+                padding: 18px;
+                font-size: 14px;
+                max-height: calc(92vh - 130px);
+            }
+            .modal-footer {
+                padding: 12px 18px;
+            }
+            .modal-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 10px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}" alt="Cat Spa & Grooming logo" class="auth-brand-logo">
+        </div>
+
+        <h1>สมัครสมาชิก</h1>
+
+        <p class="auth-subtitle">
+            สร้างบัญชีเพื่อใช้บริการ Cat Spa
+        </p>
+
+        <!-- แสดงข้อความแจ้งเตือน -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('register_post') }}" method="POST">
+            <div class="form-group">
+                <label for="reg_name">ชื่อ-นามสกุล</label>
+                <input
+                    type="text"
+                    name="name"
+                    id="reg_name"
+                    placeholder="กรอกชื่อ-นามสกุล"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="reg_email">Email <span style="color: #e54343;">*</span></label>
+                <input
+                    type="email"
+                    name="email"
+                    id="reg_email"
+                    value="{{ email or request.args.get('email', '') }}"
+                    placeholder="example@gmail.com หรือ @kkumail.com"
+                    required
+                >
+                <div style="font-size: 12px; color: #88727d; margin-top: 5px;">
+                    ✉️ กรุณากรอกอีเมลจริงที่ใช้งานได้ (เช่น @gmail.com, @hotmail.com, @kkumail.com) เพื่อรับรหัส OTP
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_phone">เบอร์โทรศัพท์ <span style="color: #e54343;">*</span></label>
+                <input
+                    type="tel"
+                    name="phone"
+                    id="reg_phone"
+                    placeholder="08XXXXXXXX"
+                    pattern="0[0-9]{9}"
+                    minlength="10"
+                    maxlength="10"
+                    inputmode="numeric"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+                    required
+                >
+                <div style="font-size: 12px; color: #88727d; margin-top: 5px;">
+                    📱 เบอร์โทรศัพท์มือถือ 10 หลักขึ้นต้นด้วย 0 ตามเบอร์ไทย
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_password">รหัสผ่าน <span style="color: #e54343;">*</span></label>
+                <div class="password-field-wrapper">
+                    <input
+                        type="password"
+                        name="password"
+                        id="reg_password"
+                        placeholder="กรอกรหัสผ่าน (อย่างน้อย 8 ตัวอักษร)"
+                        minlength="8"
+                        required
+                    >
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg_password', this)" title="กดเพื่อแสดงรหัสผ่าน" aria-label="Toggle password visibility">
+                        <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        <svg class="eye-open" style="display: none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                <div class="password-rule-hint">
+                    🔒 รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษรขึ้นไป
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_confirm_password">ยืนยันรหัสผ่าน <span style="color: #e54343;">*</span></label>
+                <div class="password-field-wrapper">
+                    <input
+                        type="password"
+                        name="confirm_password"
+                        id="reg_confirm_password"
+                        placeholder="กรอกรหัสผ่านอีกครั้ง"
+                        minlength="8"
+                        required
+                    >
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg_confirm_password', this)" title="กดเพื่อแสดงรหัสผ่าน" aria-label="Toggle confirm password visibility">
+                        <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        <svg class="eye-open" style="display: none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- ยอมรับข้อกำหนดการใช้บริการ & นโยบายความเป็นส่วนตัว -->
+            <div class="consent-group">
+                <div class="consent-header">
+                    <span>📋 ข้อกำหนดและนโยบายความเป็นส่วนตัว</span>
+                </div>
+
+                <label class="consent-item">
+                    <input
+                        type="checkbox"
+                        name="terms_accepted"
+                        id="reg_terms"
+                        value="yes"
+                        required
+                    >
+                    <span>
+                        ฉันยอมรับ
+                        <a href="{{ url_for('terms') }}" onclick="openPolicyModal(event, 'termsModal')">
+                            ข้อกำหนดการใช้บริการ
+                        </a>
+                        ของ Cat Spa & Grooming
+                    </span>
+                </label>
+
+                <label class="consent-item">
+                    <input
+                        type="checkbox"
+                        name="privacy_acknowledged"
+                        id="reg_privacy"
+                        value="yes"
+                        required
+                    >
+                    <span>
+                        ฉันได้อ่านและรับทราบ
+                        <a href="{{ url_for('privacy_policy') }}" onclick="openPolicyModal(event, 'privacyModal')">
+                            นโยบายความเป็นส่วนตัว
+                        </a>
+                        เกี่ยวกับการเก็บ ใช้ และดูแลข้อมูลส่วนบุคคล
+                    </span>
+                </label>
+            </div>
+
+            <button
+                type="submit"
+                class="auth-button"
+            >
+                สมัครสมาชิก
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            มีบัญชีอยู่แล้ว?
+            <a href="{{ url_for('login') }}">
+                เข้าสู่ระบบ
+            </a>
+        </p>
+
+        <a
+            href="{{ url_for('home') }}"
+            class="back-home"
+        >
+            ← กลับหน้าแรก
+        </a>
+    </div>
+</div>
+
+<!-- Modal: ข้อกำหนดการใช้บริการ -->
+<div id="termsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span style="font-size: 22px;">📋</span>
+                <h3 id="termsModalTitle">ข้อกำหนดการใช้บริการ</h3>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closePolicyModal('termsModal')" aria-label="ปิดหน้าต่าง">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-note-box">
+                🐾 เพื่อสุขอนามัยและความปลอดภัยสูงสุดของน้องแมวทุกตัว กรุณาอ่านและทำความเข้าใจข้อกำหนดการใช้บริการก่อนทำการลงทะเบียนและจองคิว
+            </div>
+
+            <h4>🐾 1. การสมัครสมาชิกและบัญชีผู้ใช้งาน</h4>
+            <p>ผู้ใช้บริการตกลงและยินยอมปฏิบัติตามเงื่อนไขดังต่อไปนี้:</p>
+            <ul>
+                <li>ผู้ใช้งานต้องให้ข้อมูลที่เป็นจริง ถูกต้อง และเป็นปัจจุบันในการลงทะเบียน</li>
+                <li>ผู้ใช้งานมีหน้าที่รักษาความลับของรหัสผ่านและข้อมูลบัญชีของตนเอง</li>
+                <li>ห้ามใช้บัญชีของผู้อื่นโดยไม่ได้รับอนุญาต หรือกระทำการใดๆ ที่อาจส่งผลกระทบต่อระบบของร้าน</li>
+            </ul>
+
+            <h4>🛁 2. การจองคิวและเงื่อนไขการให้บริการ</h4>
+            <ul>
+                <li>การจองคิวบริการต้องทำผ่านระบบออนไลน์ล่วงหน้า โดยระบุวันที่และเวลาที่ต้องการอย่างชัดเจน</li>
+                <li>คิวการจองจะสมบูรณ์เมื่อได้รับการยืนยันสถานะ "ยืนยันแล้ว" จากทางร้าน</li>
+                <li>กรุณานำน้องแมวมาถึงร้านก่อนเวลานัดหมายอย่างน้อย 10-15 นาที เพื่อตรวจสภาพร่างกายและขนเบื้องต้น</li>
+                <li>หากมาช้ากว่าเวลานัดหมายเกิน 20 นาที ทางร้านขอสงวนสิทธิ์ในการปรับลดขั้นตอนหรือเลื่อนคิวตามความเหมาะสม เพื่อไม่ให้กระทบต่อคิวถัดไป</li>
+            </ul>
+
+            <h4>🐱 3. สุขภาพและความปลอดภัยของน้องแมว</h4>
+            <ul>
+                <li>น้องแมวต้องได้รับวัคซีนพื้นฐานตามเกณฑ์ และมีสุขภาพทั่วไปแข็งแรง ไม่เป็นโรคร้ายแรงหรือโรคติดต่อ</li>
+                <li>หากน้องแมวมีประวัติการแพ้ แผลผ่าตัด หรือมีนิสัยตื่นกลัวเป็นพิเศษ เจ้าของต้องแจ้งทีมงานทราบล่วงหน้า</li>
+                <li>กรณีที่น้องแมวมีเห็บ หมัด หรือเชื้อรา ทางร้านจะแนะนำให้รับบริการแพ็กเกจดูแลเฉพาะเพื่อป้องกันการแพร่กระจาย</li>
+                <li>หากน้องแมวมีอาการเครียด ก้าวร้าว หรือเสี่ยงต่ออันตราย ทีมงานอาจหยุดพักหรือยุติการให้บริการชั่วคราวเพื่อความปลอดภัยของตัวน้องเอง</li>
+            </ul>
+
+            <h4>⏰ 4. การเลื่อนและยกเลิกการจอง</h4>
+            <ul>
+                <li>ลูกค้าสามารถขอยกเลิกหรือเลื่อนวันนัดหมายได้ล่วงหน้าอย่างน้อย 24 ชั่วโมงก่อนถึงเวลานัด</li>
+                <li>หากต้องการเปลี่ยนแปลงข้อมูลบริการ สามารถติดต่อทางร้านผ่านช่องทางติดต่อหรือระบบสมาชิก</li>
+            </ul>
+
+            <h4>♡ 5. ความรับผิดชอบและการดูแล</h4>
+            <p>
+                ทีมงาน Cat Spa & Grooming ทุกคนผ่านการฝึกอบรมการดูแลน้องแมวอย่างอ่อนโยนและใส่ใจในทุกขั้นตอน
+                ร้านจะดูแลน้องแมวของคุณเสมือนสมาชิกในครอบครัว ด้วยผลิตภัณฑ์ที่ได้มาตรฐานและปลอดภัยต่อสัตว์เลี้ยง 100%
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn modal-btn-secondary" onclick="closePolicyModal('termsModal')">
+                ปิด
+            </button>
+            <button type="button" class="modal-btn modal-btn-primary" onclick="acceptAndCloseModal('termsModal', 'reg_terms')">
+                ✓ ยอมรับข้อกำหนด
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: นโยบายความเป็นส่วนตัว -->
+<div id="privacyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span style="font-size: 22px;">🔒</span>
+                <h3 id="privacyModalTitle">นโยบายความเป็นส่วนตัว</h3>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closePolicyModal('privacyModal')" aria-label="ปิดหน้าต่าง">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-note-box">
+                🛡️ เอกสารนี้อธิบายแนวทางการเก็บรวบรวม ใช้ เปิดเผย และปกป้องข้อมูลส่วนบุคคลของท่านและน้องแมวตามมาตรฐานความปลอดภัย
+            </div>
+
+            <h4>1. บทนำและขอบเขต</h4>
+            <p>
+                นโยบายความเป็นส่วนตัวนี้จัดทำขึ้นโดย Cat Spa & Grooming เพื่อแจ้งให้ผู้ใช้บริการทราบถึงแนวทางการคุ้มครองข้อมูลส่วนบุคคล 
+                การสมัครสมาชิกหรือเข้าใช้บริการถือว่าท่านรับทราบนโยบายฉบับนี้
+            </p>
+
+            <h4>2. ข้อมูลส่วนบุคคลที่เราจัดเก็บ</h4>
+            <ul>
+                <li><strong>ข้อมูลสมาชิก:</strong> ชื่อ-นามสกุล อีเมล เบอร์โทรศัพท์ และข้อมูลบัญชีผู้ใช้</li>
+                <li><strong>ข้อมูลแมว:</strong> ชื่อแมว รูปภาพ สายพันธุ์ เพศ อายุ น้ำหนัก นิสัย ประวัติการแพ้ และข้อควรระวังพิเศษ</li>
+                <li><strong>ข้อมูลการจอง:</strong> รายการคอร์สบริการ วันและเวลานัดหมาย ข้อมูลการชำระเงินและสลิปโอนเงิน</li>
+                <li><strong>หลักฐานการรับทราบนโยบาย:</strong> วันที่และเวลาที่ยินยอมข้อกำหนดและรับทราบนโยบาย</li>
+            </ul>
+            <p>ร้านจะเก็บรวบรวมเฉพาะข้อมูลที่จำเป็นต่อการให้บริการเท่านั้น</p>
+
+            <h4>3. วัตถุประสงค์ในการใช้ข้อมูล</h4>
+            <ul>
+                <li>สร้างและจัดการบัญชีสมาชิก ตลอดจนการยืนยันตัวตนด้วยรหัส OTP ทางอีเมล</li>
+                <li>บันทึกและจัดการประวัติน้องแมว เพื่อการดูแลที่เหมาะสมและปลอดภัยที่สุด</li>
+                <li>ดำเนินการจองคิว ออกใบเสร็จ และแจ้งสถานะการให้บริการ</li>
+                <li>ติดต่อแจ้งเตือนนัดหมาย และประสานงานกรณีฉุกเฉิน</li>
+                <li>ปรับปรุงคุณภาพการบริการและความปลอดภัยของระบบ</li>
+            </ul>
+
+            <h4>4. การรักษาความมั่นคงปลอดภัยของข้อมูล</h4>
+            <ul>
+                <li>รหัสผ่านของสมาชิกจะถูกเข้ารหัสผ่านกรรมวิธีทางคริปโตกราฟี (Hash) ในระดับสูง</li>
+                <li>จำกัดสิทธิ์การเข้าถึงข้อมูลเฉพาะพนักงานและผู้ดูแลระบบที่เกี่ยวข้องเท่านั้น</li>
+                <li>ไม่จำหน่ายหรือเผยแพร่ข้อมูลส่วนบุคคลให้แก่บุคคลภายนอกโดยเด็ดขาด</li>
+            </ul>
+
+            <h4>5. สิทธิของเจ้าของข้อมูลส่วนบุคคล</h4>
+            <p>ผู้ใช้บริการมีสิทธิตรวจสอบ แก้ไขข้อมูลส่วนบุคคลของตนเองให้เป็นปัจจุบัน หรือขอให้ลบข้อมูลบัญชีได้ตามที่กฎหมายกำหนด</p>
+
+            <h4>6. ช่องทางการติดต่อ</h4>
+            <p>หากมีข้อสงสัยเกี่ยวกับข้อมูลส่วนบุคคล สามารถติดต่อทีมงาน Cat Spa & Grooming ผ่านหน้าติดต่อหรืออีเมลทางการของร้าน</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn modal-btn-secondary" onclick="closePolicyModal('privacyModal')">
+                ปิด
+            </button>
+            <button type="button" class="modal-btn modal-btn-primary" onclick="acceptAndCloseModal('privacyModal', 'reg_privacy')">
+                ✓ รับทราบนโยบาย
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// สลับการมองเห็นรหัสผ่าน
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const eyeOpen = btn.querySelector(".eye-open");
+    const eyeClosed = btn.querySelector(".eye-closed");
+
+    if (input.type === "password") {
+        input.type = "text";
+        if (eyeOpen) eyeOpen.style.display = "block";
+        if (eyeClosed) eyeClosed.style.display = "none";
+        btn.setAttribute("title", "กดเพื่อซ่อนรหัสผ่าน");
+    } else {
+        input.type = "password";
+        if (eyeOpen) eyeOpen.style.display = "none";
+        if (eyeClosed) eyeClosed.style.display = "block";
+        btn.setAttribute("title", "กดเพื่อแสดงรหัสผ่าน");
+    }
+}
+
+// จัดการ Modal ข้อกำหนด และ นโยบายความเป็นส่วนตัว
+function openPolicyModal(event, modalId) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation(); // ป้องกันไม่ให้คลิกทะลุไปโดน Checkbox ใน <label>
+    }
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden"; // ป้องกันหน้าหลักเลื่อนขณะดู Modal
+}
+
+function closePolicyModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove("active");
+    if (!document.querySelector(".modal-overlay.active")) {
+        document.body.style.overflow = "";
+    }
+}
+
+function acceptAndCloseModal(modalId, checkboxId) {
+    const cb = document.getElementById(checkboxId);
+    if (cb) {
+        cb.checked = true;
+        saveRegisterDraft();
+    }
+    closePolicyModal(modalId);
+}
+
+// ปิด Modal เมื่อคลิกพื้นที่ว่างภายนอก และเมื่อกดปุ่ม Escape
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".modal-overlay").forEach(function(overlay) {
+        overlay.addEventListener("click", function(e) {
+            if (e.target === this) {
+                closePolicyModal(this.id);
+            }
+        });
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" || e.key === "Esc") {
+            document.querySelectorAll(".modal-overlay.active").forEach(function(modal) {
+                closePolicyModal(modal.id);
+            });
+        }
+    });
+
+    // ตรวจสอบความถูกต้องของอีเมลก่อนส่งฟอร์ม (ป้องกันกรณีพิมพ์ข้อความที่ไม่ใช่อีเมล เช่น 'กทดห')
+    const regForm = document.querySelector("form[action*='register']");
+    if (regForm) {
+        regForm.addEventListener("submit", function(e) {
+            const emailInput = document.getElementById("reg_email");
+            if (emailInput) {
+                const val = emailInput.value.trim();
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(val)) {
+                    e.preventDefault();
+                    alert("ไม่พบอีเมลที่ท่านกรอกมา กรุณากรอกอีเมลใหม่อีกครั้ง\n(ตัวอย่าง: yourname@gmail.com, @hotmail.com หรือ @kkumail.com)");
+                    emailInput.focus();
+                    emailInput.select();
+                    return false;
+                }
+            }
+            saveRegisterDraft();
+        });
+    }
+
+    // กู้คืนข้อมูลฟอร์มที่พิมพ์ค้างไว้ (หากเคยพิมพ์แล้วย้อนกลับมา หรือรีเฟรชหน้า)
+    restoreRegisterDraft();
+
+    // บันทึกข้อมูลอัตโนมัติเมื่อมีการพิมพ์หรือติ๊กถูก
+    const inputs = ["reg_name", "reg_email", "reg_phone"];
+    inputs.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", saveRegisterDraft);
+        }
+    });
+
+    const checkboxes = ["reg_terms", "reg_privacy"];
+    checkboxes.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", saveRegisterDraft);
+        }
+    });
+});
+
+// ระบบบันทึกและกู้คืนข้อมูลสมัครสมาชิก (Auto-save draft)
+const DRAFT_KEY = "cat_spa_register_form_draft";
+
+function saveRegisterDraft() {
+    try {
+        const nameEl = document.getElementById("reg_name");
+        const emailEl = document.getElementById("reg_email");
+        const phoneEl = document.getElementById("reg_phone");
+        const termsEl = document.getElementById("reg_terms");
+        const privEl = document.getElementById("reg_privacy");
+
+        const draft = {
+            name: nameEl ? nameEl.value : "",
+            email: emailEl ? emailEl.value : "",
+            phone: phoneEl ? phoneEl.value : "",
+            terms: termsEl ? termsEl.checked : false,
+            privacy: privEl ? privEl.checked : false
+        };
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch(err) {
+        // ละเว้นหากเบราว์เซอร์ไม่อนุญาต
+    }
+}
+
+function restoreRegisterDraft() {
+    try {
+        const raw = sessionStorage.getItem(DRAFT_KEY);
+        if (!raw) return;
+        const draft = JSON.parse(raw);
+
+        const nameEl = document.getElementById("reg_name");
+        if (nameEl && !nameEl.value && draft.name) {
+            nameEl.value = draft.name;
+        }
+
+        const emailEl = document.getElementById("reg_email");
+        if (emailEl && !emailEl.value && draft.email) {
+            emailEl.value = draft.email;
+        }
+
+        const phoneEl = document.getElementById("reg_phone");
+        if (phoneEl && !phoneEl.value && draft.phone) {
+            phoneEl.value = draft.phone;
+        }
+
+        const termsEl = document.getElementById("reg_terms");
+        if (termsEl && !termsEl.checked && draft.terms) {
+            termsEl.checked = true;
+        }
+
+        const privEl = document.getElementById("reg_privacy");
+        if (privEl && !privEl.checked && draft.privacy) {
+            privEl.checked = true;
+        }
+    } catch(err) {
+        // ละเว้น
+    }
+}
+</script>
+
+</body>
+
+</html>

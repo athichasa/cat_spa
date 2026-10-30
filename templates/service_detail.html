@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ service.name }} | Cat Spa & Grooming</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            background: #fff8fa;
+            color: #45343b;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px 16px;
+        }
+
+        .detail-container {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        .detail-header {
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        .detail-hero-icon {
+            position: static !important;
+            font-size: 65px;
+            margin: 0 auto 12px;
+            display: inline-block;
+            width: auto !important;
+            height: auto !important;
+            background: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            line-height: 1;
+        }
+
+        .detail-header h1 {
+            color: #f0527d;
+            margin-bottom: 12px;
+        }
+
+        .detail-header p {
+            color: #777;
+            line-height: 1.8;
+        }
+
+        .detail-card {
+            background: white;
+            border: 1px solid #f4dce5;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 22px;
+        }
+
+        .detail-card h2 {
+            font-size: 21px;
+            margin-top: 0;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 18px 0;
+            border-bottom: 1px solid #f1e8ec;
+        }
+
+        .price-item:last-child {
+            border-bottom: none;
+        }
+
+        .price-info {
+            flex: 1;
+        }
+
+        .price-info h3 {
+            font-size: 16px;
+            margin: 0 0 8px;
+        }
+
+        .price-info p {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .price {
+            color: #f0527d;
+            font-weight: bold;
+            white-space: nowrap;
+            font-size: 18px;
+        }
+
+        .price-action-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .btn-book-service {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #f0527d, #e83e6b);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(240, 82, 125, 0.2);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .btn-book-service:hover {
+            background: linear-gradient(135deg, #d83d67, #c2255c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(240, 82, 125, 0.3);
+        }
+
+        .btn-book-login {
+            background: linear-gradient(135deg, #ff758f, #ff4d6d);
+        }
+
+        .book-cta-banner {
+            background: linear-gradient(135deg, #fff0f5, #ffe4ec);
+            border: 2px dashed #f689ad;
+            text-align: center;
+            padding: 32px 24px;
+        }
+
+        .book-cta-banner h2 {
+            color: #d94771;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+
+        .book-cta-banner p {
+            color: #7f6e76;
+            margin-bottom: 20px;
+            font-size: 14.5px;
+        }
+
+        .btn-cta-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f0527d, #e83e6b);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 13px 30px;
+            border-radius: 14px;
+            font-size: 15.5px;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(240, 82, 125, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .btn-cta-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(240, 82, 125, 0.4);
+        }
+
+        .detail-list {
+            padding-left: 22px;
+            line-height: 2;
+        }
+
+        .notice {
+            background: #fff2f6;
+            padding: 16px;
+            border-radius: 12px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 10px 0 30px;
+            color: #f0527d;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .detail-card {
+                padding: 18px;
+            }
+
+            .price-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .price-action-group {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .price {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="detail-container">
+
+    <a href="/" class="back-link">
+        ← กลับไปหน้าหลัก
+    </a>
+
+    <header class="detail-header">
+        <div class="detail-hero-icon">{{ service.icon }}</div>
+
+        <h1>{{ service.name }}</h1>
+
+        <p>{{ service.subtitle }}</p>
+
+        <p>{{ service.description }}</p>
+    </header>
+
+    <!-- ตารางราคา -->
+    <section class="detail-card">
+        <h2>💗 รายการบริการและราคา</h2>
+
+        {% for item in service.pricing %}
+        <div class="price-item">
+
+            <div class="price-info">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+            </div>
+
+            <div class="price-action-group">
+                <div class="price">
+                    {{ "{:,}".format(item.price) }} บาท
+                </div>
+
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('new_booking', service_id=item.service_id) }}" class="btn-book-service">
+                        จองคิวบริการนี้ →
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login', next=url_for('new_booking', service_id=item.service_id)) }}" class="btn-book-service btn-book-login">
+                        🔒 เข้าสู่ระบบเพื่อจองคิว →
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- สิ่งที่รวมในบริการ -->
+    <section class="detail-card">
+        <h2>✨ สิ่งที่รวมในบริการ</h2>
+
+        <ul class="detail-list">
+            {% for item in service.included %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- เงื่อนไข -->
+    <section class="detail-card">
+        <h2>📌 รายละเอียดและเงื่อนไข</h2>
+
+        {% for note in service.notes %}
+            <div class="notice">
+                {{ note }}
+            </div>
+        {% endfor %}
+    </section>
+
+    <!-- กล่อง CTA สำหรับจองคิวบริการ -->
+    <section class="detail-card book-cta-banner">
+        <h2>🐾 พร้อมพาน้องแมวมาสัมผัสความสบายแล้วหรือยัง?</h2>
+        <p>จองคิวนัดหมายล่วงหน้าเพื่อให้น้องแมวได้รับบริการที่อ่อนโยนและดีที่สุด</p>
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('new_booking', category=service.slug) }}" class="btn-cta-main">
+                จองคิว{{ service.name }}ทันที 🐾
+            </a>
+        {% else %}
+            <a href="{{ url_for('login', next=url_for('new_booking', category=service.slug)) }}" class="btn-cta-main">
+                🔒 เข้าสู่ระบบเพื่อจองคิว{{ service.name }} 🐾
+            </a>
+        {% endif %}
+    </section>
+
+    <a href="/" class="back-link">
+        ← กลับไปเลือกบริการอื่น
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แมวของฉัน - Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="cat-page-body">
+
+<div class="cat-container">
+
+    <div class="cat-header">
+        <div>
+            <h1>🐱 แมวของฉัน</h1>
+            <p>จัดการข้อมูลน้องแมวของคุณสำหรับเลือกใช้ในการจองบริการสปา</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- โหมดแจ้งเตือนสำหรับลูกค้า -->
+            <div class="notification-wrapper" id="notifWrapper">
+                <button type="button" class="notification-bell-btn" id="notifBellBtn" title="โหมดแจ้งเตือน">
+                    <span>🔔</span>
+                    {% if unread_notifications_count and unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </button>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="notification-dropdown-header">
+                        <h4>🔔 โหมดแจ้งเตือน</h4>
+                        {% if unread_notifications_count and unread_notifications_count > 0 %}
+                            <span class="notif-count-pill">{{ unread_notifications_count }} รายการ</span>
+                        {% endif %}
+                    </div>
+                    <div class="notification-dropdown-body">
+                        {% if customer_notifications %}
+                            {% for notif in customer_notifications %}
+                                {% if notif['payment_status'] == 'สลิปไม่ถูกต้อง' %}
+                                    <div class="notification-item item-slip-rejected">
+                                        <div class="notif-item-icon">⚠️</div>
+                                        <div class="notif-item-content">
+                                            <strong class="notif-item-title">สลิปการโอนเงินไม่ถูกต้อง</strong>
+                                            <p class="notif-item-desc">
+                                                การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) น้อง{{ notif['cat_name'] }} แอดมินแจ้งว่าสลิปไม่ถูกต้อง กรุณาแนบใหม่
+                                            </p>
+                                            <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-orange">
+                                                📸 แนบสลิปใหม่ →
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% elif notif['status'] in ['ยกเลิก', 'ยกเลิกแล้ว', 'ปฏิเสธ'] %}
+                                    <div class="notification-item item-cancelled">
+                                        <div class="notif-item-icon">❌</div>
+                                        <div class="notif-item-content">
+                                            <strong class="notif-item-title">การจองถูกยกเลิก</strong>
+                                            <p class="notif-item-desc">
+                                                การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) วันที่ {{ notif['booking_date'] }} ถูกยกเลิกแล้ว
+                                            </p>
+                                            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                                                <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-gray">
+                                                    ดูรายการ →
+                                                </a>
+                                                <form method="POST" action="{{ url_for('dismiss_notification', booking_id=notif['booking_id']) }}" style="display: inline;">
+                                                    <button type="submit" style="background: none; border: none; color: #9ca3af; font-size: 11px; cursor: pointer; text-decoration: underline;">
+                                                        ✓ รับทราบ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="notification-empty">
+                                <span>✨</span>
+                                <p>ไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('add_cat') }}" class="add-cat-btn">
+                <span>+</span> เพิ่มแมว
+            </a>
+        </div>
+    </div>
+
+    {% if cats %}
+
+        <div class="cat-list">
+            {% for cat in cats %}
+            <div class="cat-card">
+            
+                <div class="cat-photo">
+                    {% if cat["image"] %}
+                        <img
+                            src="{{ url_for('uploaded_cat_image', filename=cat['image']) }}"
+                            alt="รูปของ {{ cat['cat_name'] }}"
+                            class="cat-photo-img"
+                            onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'cat-no-photo\'>🐱</div>';"
+                        >
+                    {% else %}
+                        <div class="cat-no-photo">🐱</div>
+                    {% endif %}
+                </div>
+
+                <div class="cat-info">
+                    <h2>{{ cat["cat_name"] }}</h2>
+
+                    <p>
+                        <strong>สายพันธุ์:</strong>
+                        <span>{{ cat["breed"] or "-" }}</span>
+                    </p>
+
+                    <p>
+                        <strong>ลักษณะขน:</strong>
+                        <span>{{ cat["coat_type"] or "-" }}</span>
+                    </p>
+
+                    <p>
+                        <strong>เพศ:</strong>
+                        <span>{{ cat["gender"] or "-" }}</span>
+                    </p>
+
+                    <p>
+                        <strong>อายุ:</strong>
+                        <span>{{ cat["age"] or "-" }} ปี</span>
+                    </p>
+
+                    <p>
+                        <strong>น้ำหนัก:</strong>
+                        <span>{{ cat["weight"] or "-" }} กก.</span>
+                    </p>
+
+                    {% if cat["notes"] %}
+                    <div class="cat-notes-box">
+                        <strong>หมายเหตุ:</strong> {{ cat["notes"] }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="cat-actions">
+                    <a href="{{ url_for('edit_cat', cat_id=cat['cat_id']) }}" class="edit-btn">
+                        <span>✏️</span> แก้ไข
+                    </a>
+
+                    <form method="POST"
+                          action="{{ url_for('delete_cat', cat_id=cat['cat_id']) }}"
+                          data-cat-name="{{ cat['cat_name'] }}"
+                          onsubmit="return confirm('ต้องการลบข้อมูลแมว ' + this.dataset.catName + ' ตัวนี้หรือไม่?');">
+                        <button type="submit" class="delete-btn">
+                            🗑️ ลบ
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+
+        <div class="empty-cat">
+            <div class="empty-icon">🐈</div>
+            <h2>ยังไม่มีข้อมูลน้องแมว</h2>
+            <p>เพิ่มข้อมูลน้องแมวตัวโปรดของคุณ เพื่อเลือกใช้ในการจองบริการสปาได้สะดวกรวดเร็ว</p>
+            <a href="{{ url_for('add_cat') }}" class="add-cat-btn">
+                <span>+</span> เพิ่มข้อมูลแมว
+            </a>
+        </div>
+
+    {% endif %}
+
+    <div class="back-dashboard">
+        <a href="{{ url_for('dashboard') }}">
+            ← กลับหน้าหลัก
+        </a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const notifBellBtn = document.getElementById("notifBellBtn");
+    const notifDropdown = document.getElementById("notifDropdown");
+    if (notifBellBtn && notifDropdown) {
+        notifBellBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            notifDropdown.classList.toggle("show");
+        });
+        document.addEventListener("click", function(e) {
+            if (!notifDropdown.contains(e.target) && !notifBellBtn.contains(e.target)) {
+                notifDropdown.classList.remove("show");
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

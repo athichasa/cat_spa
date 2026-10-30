@@ -1,0 +1,370 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard ผู้ดูแลระบบ | Cat Spa & Grooming{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>📊 แดชบอร์ดภาพรวมระบบ</h1>
+        <p>ยินดีต้อนรับแอดมิน {{ session.get('name', 'Admin') }} สรุปข้อมูลการดำเนินงานประจำวันที่ {{ today_str }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin_bookings') }}" class="admin-btn admin-btn-primary">
+            📅 ตรวจสอบคิวการจอง ({{ pending }} รอยืนยัน)
+        </a>
+    </div>
+</div>
+
+<!-- สถิติภาพรวม 6 การ์ด -->
+<section class="admin-stats-grid">
+    <div class="admin-stat-card stat-pending">
+        <div class="stat-info">
+            <h3>⏳ รอยืนยัน</h3>
+            <div class="stat-number">{{ pending }}</div>
+            <div class="stat-desc">คิวที่รอแอดมินตอบรับ</div>
+        </div>
+        <div class="stat-icon">⏳</div>
+    </div>
+
+    <div class="admin-stat-card stat-confirmed">
+        <div class="stat-info">
+            <h3>✅ ยืนยันแล้ว</h3>
+            <div class="stat-number">{{ confirmed }}</div>
+            <div class="stat-desc">คิวที่พร้อมให้บริการ</div>
+        </div>
+        <div class="stat-icon">📅</div>
+    </div>
+
+    <div class="admin-stat-card stat-completed">
+        <div class="stat-info">
+            <h3>🏁 เสร็จสิ้น</h3>
+            <div class="stat-number">{{ completed }}</div>
+            <div class="stat-desc">บริการที่เสร็จสมบูรณ์</div>
+        </div>
+        <div class="stat-icon">✨</div>
+    </div>
+
+    <div class="admin-stat-card stat-revenue">
+        <div class="stat-info">
+            <h3>💰 รายได้รวม</h3>
+            <div class="stat-number" style="font-size: 26px;">{{ "{:,}".format(revenue) }} <span style="font-size: 14px; font-weight: normal;">บาท</span></div>
+            <div class="stat-desc">จากบริการที่เสร็จสิ้น</div>
+        </div>
+        <div class="stat-icon">💵</div>
+    </div>
+
+    <div class="admin-stat-card stat-members">
+        <div class="stat-info">
+            <h3>👥 สมาชิก</h3>
+            <div class="stat-number">{{ total_members }}</div>
+            <div class="stat-desc">ลูกค้าที่ลงทะเบียน</div>
+        </div>
+        <div class="stat-icon">👤</div>
+    </div>
+
+    <div class="admin-stat-card stat-cats">
+        <div class="stat-info">
+            <h3>🐱 น้องแมว</h3>
+            <div class="stat-number">{{ total_cats }}</div>
+            <div class="stat-desc">น้องแมวในระบบ</div>
+        </div>
+        <div class="stat-icon">🐾</div>
+    </div>
+
+    <div class="admin-stat-card" style="border-left-color: #ed5682;">
+        <div class="stat-info">
+            <h3>⭐ รีวิวร้านเฉลี่ย</h3>
+            <div class="stat-number" style="color: #ed5682;">{{ "%.1f"|format(avg_shop_rating or 5.0) }} <span style="font-size: 13px; color: #7f6e76;">(5.0)</span></div>
+            <div class="stat-desc"><a href="{{ url_for('admin_reviews') }}" style="color: #ed5682; font-weight: 700; text-decoration: none;">ดูรีวิว {{ total_reviews }} รายการ →</a></div>
+        </div>
+        <div class="stat-icon">⭐</div>
+    </div>
+
+    <div class="admin-stat-card" style="border-left-color: #f472b6;">
+        <div class="stat-info">
+            <h3>👩‍💼 พนักงาน</h3>
+            <div class="stat-number">{{ staff_count }} <span style="font-size: 14px; font-weight: normal;">คน</span></div>
+            <div class="stat-desc"><a href="{{ url_for('admin_staff') }}" style="color: #be185d; font-weight: 700; text-decoration: none;">จัดการพนักงาน →</a></div>
+        </div>
+        <div class="stat-icon">👩‍💼</div>
+    </div>
+</section>
+
+<!-- เนื้อหา 2 คอลัมน์ -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+    
+    <!-- ฝั่งซ้าย: คิวที่รอยืนยันเร่งด่วน + คิววันนี้ -->
+    <div>
+        <!-- คิวรอยืนยัน -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2>⏳ คิวที่ต้องดำเนินการ ({{ pending_bookings|length }} รายการ)</h2>
+                <a href="{{ url_for('admin_bookings', status='รอยืนยัน') }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                    ดูทั้งหมด →
+                </a>
+            </div>
+
+            {% if pending_bookings %}
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    {% for item in pending_bookings %}
+                    <div style="background: #fffafc; border: 1px solid #f6e4ec; border-radius: 14px; padding: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            {% if item['cat_image'] %}
+                                <a href="{{ url_for('uploaded_cat_image', filename=item['cat_image']) }}" target="_blank" title="คลิกเพื่อดูรูปภาพน้องแมว">
+                                    <img src="{{ url_for('uploaded_cat_image', filename=item['cat_image']) }}" alt="{{ item['cat_name'] }}" class="pet-avatar" style="width: 48px; height: 48px; object-fit: cover; border: 2px solid #e85d87;">
+                                </a>
+                            {% else %}
+                                <div class="pet-avatar-placeholder" style="width: 48px; height: 48px;">
+                                    🐱
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight: 700; font-size: 15.5px; color: #3d3136;">
+                                    น้อง{{ item['cat_name'] or 'แมว' }} (ลูกค้า: {{ item['customer_name'] }})
+                                </div>
+                                <div style="font-size: 13.5px; color: #7f6e76; margin-top: 3px;">
+                                    ✂️ {{ item['service_name'] }} • 📅 <strong>{{ item['booking_date'] }}</strong> เวลา <strong>{{ item['booking_time'] }} น.</strong>
+                                </div>
+                                
+                                <!-- ข้อมูลบริการรับ-ส่งน้องแมว (Pet Taxi) ในคิวรอยืนยัน -->
+                                {% if item['delivery_type'] and item['delivery_type'] != 'none' %}
+                                    <div style="font-size: 12.5px; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="background: #ffe3ec; color: #c2255c; padding: 2px 8px; border-radius: 12px; font-weight: 600;">🚗 รับ-ส่ง ({{ "%.1f"|format(item['distance_km'] or 0) }} กม. / +{{ "{:,}".format(item['delivery_fee']) }}฿)</span>
+                                        {% if item['latitude'] and item['longitude'] %}
+                                            <a href="https://www.google.com/maps?q={{ item['latitude'] }},{{ item['longitude'] }}" target="_blank" style="color: #2b8a3e; text-decoration: none; font-weight: 600; font-size: 12px;">🗺️ แผนที่ Google Maps</a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- ข้อมูลการชำระเงินและสลิป -->
+                                <div style="font-size: 12px; margin-top: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    {% if item['payment_method'] == 'qr_code' %}
+                                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-weight: 700;">📱 QR พร้อมเพย์</span>
+                                        {% if item['payment_slip'] %}
+                                            <a href="{{ url_for('uploaded_payment_slip', filename=item['payment_slip']) }}" target="_blank" style="color: #0284c7; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                                                🔍 ดูสลิป
+                                            </a>
+                                        {% else %}
+                                            <span style="color: #b45309;">⏳ รอสลิป</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 6px; font-weight: 700;">💵 จ่ายหน้าร้าน</span>
+                                    {% endif %}
+
+                                    {% if item['payment_status'] == 'ชำระเงินแล้ว' %}
+                                        <span style="color: #15803d; font-weight: 700;">✓ ชำระแล้ว</span>
+                                    {% elif item['payment_status'] == 'รอตรวจสอบสลิป' %}
+                                        <span style="color: #0284c7; font-weight: 700;">(รอตรวจสลิป)</span>
+                                    {% endif %}
+                                </div>
+
+                                {% if item['notes'] %}
+                                    <div style="font-size: 12.5px; color: #c2410c; margin-top: 4px;">
+                                        💬 หมายเหตุ: {{ item['notes'] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px; font-weight: 800; color: #e85d87; margin-right: 8px;">
+                                {{ "{:,}".format(item['price']) }} ฿
+                            </span>
+
+                            <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=item['booking_id']) }}" style="display: inline;">
+                                <input type="hidden" name="status" value="ยืนยันแล้ว">
+                                <button type="submit" class="admin-btn admin-btn-success admin-btn-sm" onclick="return confirm('ยืนยันรับการจองคิวนี้หรือไม่?')">
+                                    ✓ ยืนยัน
+                                </button>
+                            </form>
+
+                            <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=item['booking_id']) }}" style="display: inline;">
+                                <input type="hidden" name="status" value="ปฏิเสธ">
+                                <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm" onclick="return confirm('ต้องการปฏิเสธคิวนี้หรือไม่?')">
+                                    ✕ ปฏิเสธ
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state" style="padding: 35px 20px;">
+                    <div class="admin-empty-icon" style="font-size: 38px;">🎉</div>
+                    <h3>ยอดเยี่ยม! ไม่มีคิวค้างที่รอยืนยัน</h3>
+                    <p>ทุกรายการจองได้รับการตรวจสอบและตอบรับเรียบร้อยแล้ว</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- คิวประจำวันนี้ -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2>📅 คิวนัดหมายประจำวันนี้ ({{ today_str }})</h2>
+                <a href="{{ url_for('admin_bookings', date=today_str) }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                    ดูคิววันนี้ทั้งหมด →
+                </a>
+            </div>
+
+            {% if today_bookings %}
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>เวลา</th>
+                                <th>น้องแมว</th>
+                                <th>ลูกค้า</th>
+                                <th>บริการ</th>
+                                <th>ราคา & การจ่าย</th>
+                                <th>สถานะ</th>
+                                <th>การจัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in today_bookings %}
+                            <tr>
+                                <td><strong>🕒 {{ b['booking_time'] }} น.</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        {% if b['cat_image'] %}
+                                            <a href="{{ url_for('uploaded_cat_image', filename=b['cat_image']) }}" target="_blank" title="คลิกดูรูปเต็ม">
+                                                <img src="{{ url_for('uploaded_cat_image', filename=b['cat_image']) }}" alt="{{ b['cat_name'] }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e85d87;">
+                                            </a>
+                                        {% endif %}
+                                        <span>น้อง{{ b['cat_name'] or '-' }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ b['customer_name'] }}</td>
+                                <td>
+                                    <div>{{ b['service_name'] }}</div>
+                                    {% if b['delivery_type'] and b['delivery_type'] != 'none' %}
+                                        <div style="font-size: 11.5px; color: #c2255c; margin-top: 2px;">
+                                            🚗 รับ-ส่ง ({{ "%.1f"|format(b['distance_km'] or 0) }} กม. / {{ "{:,}".format(b['delivery_fee']) }}฿)
+                                            {% if b['latitude'] and b['longitude'] %}
+                                                • <a href="https://www.google.com/maps?q={{ b['latitude'] }},{{ b['longitude'] }}" target="_blank" style="color: #2b8a3e; text-decoration: none;">🗺️ แผนที่</a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ "{:,}".format(b['price']) }} ฿</strong>
+                                    <div style="font-size: 11px; margin-top: 2px;">
+                                        {% if b['payment_method'] == 'qr_code' %}
+                                            <span style="color: #0284c7; font-weight: 600;">📱 QR พร้อมเพย์</span>
+                                            {% if b['payment_slip'] %}
+                                                • <a href="{{ url_for('uploaded_payment_slip', filename=b['payment_slip']) }}" target="_blank" style="color: #0284c7;">สลิป</a>
+                                            {% endif %}
+                                        {% else %}
+                                            <span style="color: #92400e; font-weight: 600;">💵 จ่ายหน้าร้าน</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if b['status'] == 'รอยืนยัน' %}
+                                        <span class="admin-badge badge-pending">⏳ รอยืนยัน</span>
+                                    {% elif b['status'] == 'ยืนยันแล้ว' %}
+                                        <span class="admin-badge badge-confirmed">✅ ยืนยันแล้ว</span>
+                                    {% elif b['status'] == 'เสร็จสิ้น' %}
+                                        <span class="admin-badge badge-completed">🏁 เสร็จสิ้น</span>
+                                    {% else %}
+                                        <span class="admin-badge badge-rejected">❌ {{ b['status'] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if b['status'] == 'ยืนยันแล้ว' %}
+                                        <form method="POST" action="{{ url_for('admin_update_booking_status', booking_id=b['booking_id']) }}">
+                                            <input type="hidden" name="status" value="เสร็จสิ้น">
+                                            <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm" onclick="return confirm('ยืนยันว่าให้บริการเสร็จสิ้นแล้ว?')">
+                                                ✓ เสร็จสิ้น
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <a href="{{ url_for('admin_bookings') }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                                            ดูคิว
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 25px; color: #88727d;">
+                    ยังไม่มีคิวที่นัดหมายไว้สำหรับวันนี้ ({{ today_str }})
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ฝั่งขวา: เมนูลัดและการจัดการร้าน -->
+    <div>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>🚀 เมนูการจัดการร้าน</h3>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="{{ url_for('admin_bookings') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-radius: 14px; background: #fff8fa; border: 1px solid #f6e4ec; text-decoration: none; color: #3d3136; font-weight: 700; transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 22px;">📅</span>
+                        <div>
+                            <div>จัดการคิวการจอง</div>
+                            <small style="font-weight: normal; color: #88727d;">ตรวจสอบ ยืนยัน และอัปเดตสถานะ</small>
+                        </div>
+                    </div>
+                    <span style="color: #e85d87;">→</span>
+                </a>
+
+                <a href="{{ url_for('admin_services') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-radius: 14px; background: #fff8fa; border: 1px solid #f6e4ec; text-decoration: none; color: #3d3136; font-weight: 700; transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 22px;">✂️</span>
+                        <div>
+                            <div>จัดการคอร์สบริการและราคา</div>
+                            <small style="font-weight: normal; color: #88727d;">เพิ่ม-ลดคอร์ส ปรับราคา และเปิด-ปิดบริการ</small>
+                        </div>
+                    </div>
+                    <span style="color: #e85d87;">→</span>
+                </a>
+
+                <a href="{{ url_for('admin_members') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-radius: 14px; background: #fff8fa; border: 1px solid #f6e4ec; text-decoration: none; color: #3d3136; font-weight: 700; transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 22px;">👥</span>
+                        <div>
+                            <div>จัดการสมาชิก</div>
+                            <small style="font-weight: normal; color: #88727d;">ค้นหาลูกค้า ดูประวัติ และข้อมูลแมว</small>
+                        </div>
+                    </div>
+                    <span style="color: #e85d87;">→</span>
+                </a>
+
+                <a href="{{ url_for('admin_history') }}" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-radius: 14px; background: #fff8fa; border: 1px solid #f6e4ec; text-decoration: none; color: #3d3136; font-weight: 700; transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 22px;">📚</span>
+                        <div>
+                            <div>ประวัติและยอดรายได้</div>
+                            <small style="font-weight: normal; color: #88727d;">บริการที่เสร็จสิ้นและสรุปยอดเงิน</small>
+                        </div>
+                    </div>
+                    <span style="color: #e85d87;">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- การ์ดข้อมูลร้านค้า -->
+        <div class="admin-card" style="background: linear-gradient(135deg, #fff0f5, #ffffff);">
+            <div class="admin-card-header">
+                <h3>ℹ️ ข้อมูลระบบ</h3>
+            </div>
+            <p style="font-size: 14px; margin-bottom: 8px;"><strong>ชื่อระบบ:</strong> Cat Spa & Grooming</p>
+            <p style="font-size: 14px; margin-bottom: 8px;"><strong>แพ็กเกจเปิดขาย:</strong> {{ total_services }} คอร์ส</p>
+            <p style="font-size: 14px; margin-bottom: 8px;"><strong>รวมรายการจองทั้งหมด:</strong> {{ total }} รายการ</p>
+            <p style="font-size: 14px; margin-bottom: 16px;"><strong>สิทธิ์เข้าถึง:</strong> ผู้ดูแลระบบระดับสูง (Admin)</p>
+            <a href="{{ url_for('home') }}" class="admin-btn admin-btn-outline-primary" style="width: 100%; justify-content: center;" target="_blank">
+                🌐 ตรวจสอบหน้าเว็บไซต์จริง
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

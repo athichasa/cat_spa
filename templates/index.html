@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Spa & Grooming - ดูแลน้องแมวด้วยหัวใจ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="landing-page">
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <a class="brand" href="#home">
+        <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}"
+             alt="Cat Spa Logo" class="site-logo">
+        <span>Cat Spa <small>& Grooming</small></span>
+    </a>
+
+    <nav class="nav-menu">
+        <a class="active" href="#home">หน้าแรก</a>
+        <a href="#services">บริการ</a>
+        <a href="#packages">แพ็กเกจสปา</a>
+        <a href="{{ url_for('staff_page') }}">ทีมผู้เชี่ยวชาญ</a>
+        <a href="#reviews">รีวิวลูกค้า</a>
+        <a href="#about">เกี่ยวกับเรา</a>
+        <a href="#contact">ติดต่อเรา</a>
+    </nav>
+
+    <div class="nav-actions">
+        <a class="login-link" href="{{ url_for('login') }}">
+            เข้าสู่ระบบ
+        </a>
+        <a class="btn btn-primary" href="{{ url_for('register') }}">
+            สมัครสมาชิก
+        </a>
+    </div>
+</header>
+
+
+<!-- HERO BANNER -->
+<section class="hero-section" id="home">
+    <div class="hero-content">
+        <p class="hero-eyebrow">🐾 CAT SPA & GROOMING</p>
+
+        <h1>
+            ดูแลน้องแมว<br>
+            ให้สะอาด สุขภาพดี<br>
+            <span>และผ่อนคลาย</span>
+        </h1>
+
+        <p class="hero-description">
+            บริการอาบน้ำ สปาบำรุงขน ตัดแต่งทรง
+            และดูแลความสะอาดสำหรับน้องแมว<br>
+            โดยทีมงานมืออาชีพที่ใส่ใจในทุกขั้นตอน
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{{ url_for('new_booking') }}" class="btn-primary">
+                จองคิวเลย <span>→</span>
+            </a>
+
+            <a href="#packages" class="btn-outline">
+                ดูแพ็กเกจทั้งหมด
+            </a>
+        </div>
+
+        <p class="hero-note">♡ ทุกอุ้งเท้าคือความสุขของเรา</p>
+    </div>
+
+    <div class="hero-visual">
+        <div class="hero-circle"></div>
+
+        <img
+            src="{{ url_for('static', filename='images/cat-spa-hero.png') }}"
+            alt="น้องแมวที่ได้รับการดูแลจาก Cat Spa"
+            class="hero-cat"
+        >
+
+        <div class="hero-bubble">
+            <span class="hero-star">⭐</span>
+            <div>
+                <strong>บริการคุณภาพระดับพรีเมียม</strong>
+                <p>ใส่ใจและเข้าใจน้องแมวทุกตัว</p>
+            </div>
+        </div>
+
+        <span class="floating-paw paw-one">🐾</span>
+        <span class="floating-paw paw-two">♡</span>
+        <span class="floating-paw paw-three">✦</span>
+    </div>
+</section>
+
+
+<!-- POPULAR SERVICES -->
+<section class="services-section" id="services">
+    <div class="section-heading">
+        <p class="section-eyebrow">🐾 บริการยอดนิยม</p>
+        <h2>ดูแลน้องแมวครบวงจร</h2>
+        <p>บริการคุณภาพ จัดเต็มความสะอาดและความผ่อนคลาย</p>
+    </div>
+
+    <div class="service-grid">
+
+        <article class="service-card">
+            <div class="service-image-wrap">
+                <img
+                    src="{{ url_for('static', filename='images/cat-bath.png') }}"
+                    alt="บริการอาบน้ำแมว"
+                    class="service-image"
+                    loading="lazy"
+                >
+                <span class="service-badge">ยอดนิยม</span>
+                <span class="service-icon">🛁</span>
+            </div>
+            <div class="service-body">
+                <h3>อาบน้ำแมว</h3>
+                <p>ทำความสะอาดขนและผิวหนัง พร้อมเป่าขนให้แห้งนุ่ม สบายตัว</p>
+                <div class="service-footer">
+                    <span>เริ่มต้น {{ min_prices.get('bath', 300) }} บาท</span>
+                    <span>60 นาที</span>
+                </div>
+                <div class="service-card-action">
+                    <a href="{{ url_for('service_detail', service_id='bath') }}" class="service-link-btn">
+                        ดูรายละเอียด →
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <article class="service-card">
+            <div class="service-image-wrap">
+                <img
+                    src="{{ url_for('static', filename='images/cat-grooming.png') }}"
+                    alt="บริการสปาแมว"
+                    class="service-image"
+                    loading="lazy"
+                >
+                <span class="service-badge">แนะนำ</span>
+                <span class="service-icon">🧴</span>
+            </div>
+            <div class="service-body">
+                <h3>สปาแมว</h3>
+                <p>บำรุงขนให้นุ่มสวย ผ่อนคลายด้วยผลิตภัณฑ์ดูแลผิวหนังสำหรับแมว</p>
+                <div class="service-footer">
+                    <span>เริ่มต้น {{ min_prices.get('spa', 450) }} บาท</span>
+                    <span>90 นาที</span>
+                </div>
+                <div class="service-card-action">
+                    <a href="{{ url_for('service_detail', service_id='spa') }}" class="service-link-btn">
+                        ดูรายละเอียด →
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <article class="service-card">
+            <div class="service-image-wrap">
+                <img
+                    src="{{ url_for('static', filename='images/cat-haircut.png') }}"
+                    alt="บริการตัดแต่งขนแมว"
+                    class="service-image"
+                    loading="lazy"
+                >
+                <span class="service-badge">ยอดนิยม</span>
+                <span class="service-icon">✂️</span>
+            </div>
+            <div class="service-body">
+                <h3>ตัดแต่งขน</h3>
+                <p>จัดทรงขนให้สวยงาม ตัดแต่งและเล็มขนตามความเหมาะสมของน้องแมว</p>
+                <div class="service-footer">
+                    <span>เริ่มต้น {{ min_prices.get('haircut', 200) }} บาท</span>
+                    <span>45 นาที</span>
+                </div>
+                <div class="service-card-action">
+                    <a href="{{ url_for('service_detail', service_id='haircut') }}" class="service-link-btn">
+                        ดูรายละเอียด →
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <article class="service-card">
+            <div class="service-image-wrap">
+                <img
+                    src="{{ url_for('static', filename='images/cat-nails.png') }}"
+                    alt="บริการตัดเล็บแมว"
+                    class="service-image"
+                    loading="lazy"
+                >
+                <span class="service-badge">แนะนำ</span>
+                <span class="service-icon">🐾</span>
+            </div>
+            <div class="service-body">
+                <h3>ตัดเล็บ</h3>
+                <p>ตัดแต่งปลายเล็บอย่างระมัดระวังและปลอดภัย ตรวจดูสุขภาพอุ้งเท้า</p>
+                <div class="service-footer">
+                    <span>เริ่มต้น {{ min_prices.get('nails', 100) }} บาท</span>
+                    <span>30 นาที</span>
+                </div>
+                <div class="service-card-action">
+                    <a href="{{ url_for('service_detail', service_id='nails') }}" class="service-link-btn">
+                        ดูรายละเอียด →
+                    </a>
+                </div>
+            </div>
+        </article>
+
+    </div>
+</section>
+
+
+<!-- SPA PACKAGES -->
+<section class="packages-section" id="packages">
+    <div class="section-heading">
+        <p class="section-eyebrow">♡ SPECIAL FOR YOUR CAT</p>
+        <h2>แพ็กเกจสปาแมว & Grooming</h2>
+        <p>เลือกความสุขที่เหมาะกับสมาชิกตัวน้อยของคุณ</p>
+    </div>
+
+    <div class="package-grid">
+        <article class="package-card">
+            <img
+                src="{{ url_for('static', filename='images/cat-bath.png') }}"
+                alt="แพ็กเกจดูแลน้องแมว"
+                loading="lazy"
+            >
+            <div class="package-content">
+                <span class="package-label">สำหรับวันสบาย ๆ</span>
+                <h3>แพ็กเกจแสนละมุน</h3>
+                <p>เหมาะสำหรับการทำความสะอาดและดูแลขนเบื้องต้น</p>
+                <ul>
+                    <li>อาบน้ำทำความสะอาด</li>
+                    <li>เป่าขนและหวีขน</li>
+                    <li>ตรวจเช็กความเรียบร้อยหลังบริการ</li>
+                </ul>
+                <div class="package-bottom">
+                    <span class="package-price">เริ่มต้น 300 บาท</span>
+                    <a href="{{ url_for('new_booking') }}" class="package-link">จองบริการ →</a>
+                </div>
+            </div>
+        </article>
+
+        <article class="package-card package-featured">
+            <span class="package-ribbon">แนะนำ</span>
+            <img
+                src="{{ url_for('static', filename='images/cat-grooming.png') }}"
+                alt="แพ็กเกจสปาพรีเมียมสำหรับแมว"
+                loading="lazy"
+            >
+            <div class="package-content">
+                <span class="package-label">เอาใจเจ้านายเป็นพิเศษ</span>
+                <h3>แพ็กเกจพรีเมียม</h3>
+                <p>ดูแลขนและเพิ่มช่วงเวลาแห่งการผ่อนคลาย</p>
+                <ul>
+                    <li>อาบน้ำและดูแลขนอย่างล้ำลึก</li>
+                    <li>บำรุงขนด้วยผลิตภัณฑ์<br>
+                        สำหรับแมวโดยเฉพาะ</li>
+                    <li>จัดแต่งขนตามความเหมาะสม</li>
+                </ul>
+                <div class="package-bottom">
+                    <span class="package-price">เริ่มต้น 450 บาท</span>
+                    <a href="{{ url_for('new_booking') }}" class="package-link">จองบริการ →</a>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <p class="package-note">
+        🐱 รายละเอียดและราคาสุดท้ายให้ยึดตามบริการที่เลือกในระบบจองคิว
+    </p>
+</section>
+
+
+<!-- CUSTOMER REVIEWS & FEEDBACK SHOWCASE -->
+<section class="reviews-section" id="reviews">
+    <div class="section-heading reveal">
+        <span class="eyebrow">CUSTOMER FEEDBACK & REVIEWS</span>
+        <h2>⭐ เสียงตอบรับและความประทับใจจากลูกค้า</h2>
+        <p>
+            คะแนนรีวิวร้านค้าภาพรวม <strong style="color: #f59e0b; font-size: 1.15em;">⭐ {{ "%.1f"|format(avg_shop_rating or 5.0) }} / 5.0</strong> จากผู้ปกครองน้องแมวทุกท่านที่วางใจให้เราดูแล ♡
+        </p>
+    </div>
+
+    <div class="landing-reviews-container reveal">
+        {% for rev in shop_reviews %}
+        <div class="landing-review-card">
+            <div class="landing-review-top">
+                <div class="landing-user-badge">
+                    <span class="avatar-icon">🐱</span>
+                    <div>
+                        <strong class="masked-name">{{ rev.masked_user_name }}</strong>
+                        <div class="pet-name">น้อง{{ rev.cat_name }}</div>
+                    </div>
+                </div>
+                <div class="review-stars-pill" title="คะแนนความพึงพอใจ 5.0">
+                    <span class="rating-num">{{ "%.1f"|format(rev.shop_rating or 5.0) }}</span>
+                </div>
+            </div>
+
+            <p class="landing-review-body">
+                “{{ rev.shop_comment or rev.staff_comment }}”
+            </p>
+
+            <div class="landing-review-footer">
+                <span class="review-service-tag">🐾 {{ rev.service_name or 'Cat Spa' }}</span>
+                {% if rev.staff_name %}
+                    <span class="review-staff-tag">👩‍💼 ดูแลโดย คุณ{{ rev.staff_name }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="reviews-cta reveal">
+        <a href="{{ url_for('staff_page') }}" class="btn-meet-team">
+            <span>🐾</span> ดูรีวิวทีมงานและเลือกผู้ดูแลน้องแมว
+        </a>
+    </div>
+</section>
+
+<!-- ABOUT / TRUST -->
+<section class="trust-section" id="about">
+    <div class="trust-inner reveal">
+        <div class="trust-decoration">🐱</div>
+        <div>
+            <span class="eyebrow">OUR LITTLE PROMISE</span>
+            <h2>เพราะน้องแมวคือสมาชิกคนสำคัญ</h2>
+            <p>
+                เราใส่ใจความสะอาด ความอ่อนโยน และความสบายใจของน้องแมว<br>
+                เพื่อให้ทุกครั้งที่มา Cat Spa เป็นช่วงเวลาดี ๆ ของทั้งคุณและน้อง
+            </p>
+        </div>
+        <div class="trust-points">
+            <span>♡ ดูแลอย่างอ่อนโยน</span>
+            <span>🐾 ใส่ใจทุกรายละเอียด</span>
+            <span>✦ สะอาดและปลอดภัย</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="footer" id="contact">
+    <div class="footer-container">
+        <!-- 1. คอลัมน์แบรนด์และสโลแกน -->
+        <div class="footer-col footer-brand-col">
+            <a class="brand footer-brand" href="#home">
+                <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}"
+                     alt="Cat Spa Logo" class="site-logo">
+                <span>Cat Spa <small>& Grooming</small></span>
+            </a>
+            <p class="footer-tagline">
+                ดูแลน้องเหมือนคนในครอบครัว มอบความสะอาด สุขภาพดี และความสบายตัวให้น้องแมวที่คุณรักด้วยบริการคุณภาพระดับพรีเมียม ♡
+            </p>
+            <div class="footer-badge-item">
+                <span>🐾 บริการด้วยหัวใจ ปลอดภัยต่อสัตว์เลี้ยง 100%</span>
+            </div>
+            <div class="footer-hours">
+                <span>⏰ <strong>เวลาทำการ:</strong> ทุกวัน 09:00 - 19:00 น.</span>
+            </div>
+        </div>
+
+        <!-- 2. คอลัมน์ข้อมูลการติดต่อ & Email แอดมิน & ที่อยู่ร้าน -->
+        <div class="footer-col">
+            <h3 class="footer-title">📍 ข้อมูลติดต่อร้าน & แอดมิน</h3>
+            <ul class="footer-contact-list">
+                <li>
+                    <span class="contact-icon">🏬</span>
+                    <div>
+                        <strong>ที่อยู่ของร้าน:</strong>
+                        <p> 123 หมู่ 16 ถนนมิตรภาพ ตำบลในเมือง อำเภอเมือง<br>
+                            จังหวัดขอนแก่น 40002 (มีที่จอดรถสะดวกสบายหน้าร้าน)</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">📞</span>
+                    <div>
+                        <strong>เบอร์โทรศัพท์ติดต่อ:</strong>
+                        <p><a href="tel:0646972101">064-697-2101</a></p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">✉️</span>
+                    <div>
+                        <strong>Email แอดมิน:</strong>
+                        <p><a href="mailto:athicha.sa@kkumail.com">athicha.sa@kkumail.com</a></p>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon">🐱</span>
+                    <div>
+                        <strong>แอดมินผู้ดูแล:</strong>
+                        <p>คุณมะลิ</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 3. คอลัมน์แอดไลน์สอบถามข้อมูลเพิ่มเติม -->
+        <div class="footer-col footer-line-col">
+            <h3 class="footer-title">💬 แอดไลน์สอบถามเพิ่มเติม</h3>
+            <p class="line-intro">
+                ปรึกษาการดูแลขน สอบถามคิวว่าง หรือจองคิวด่วน<br>
+                แอดมินพร้อมตอบและให้คำแนะนำอย่างอบอุ่นค่ะ
+            </p>
+            <div class="line-card">
+                <div class="line-logo-badge">LINE</div>
+                <div>
+                    <span class="line-sub">LINE OFFICIAL ID</span>
+                    <strong class="line-id">@catspa</strong>
+                </div>
+            </div>
+            <a href="https://line.me" target="_blank" class="btn-line-add">
+                <span>➕</span> แอดไลน์ @catspa สอบถามเลย
+            </a>
+            <p class="line-note">
+                ✓ ตอบกลับไวในเวลาทำการ (09:00 - 19:00 น.)
+            </p>
+        </div>
+
+        <!-- 4. คอลัมน์ลิงก์สำคัญและเงื่อนไข -->
+        <div class="footer-col">
+            <h3 class="footer-title">🔗 ข้อมูลที่ลูกค้าควรทราบ</h3>
+            <ul class="footer-nav-links">
+                <li><a href="#services">🐾 บริการยอดนิยมทั้งหมด</a></li>
+                <li><a href="#packages">✨ แพ็กเกจสปาพรีเมียม</a></li>
+                <li><a href="#about">♡ ข้อสัญญาและคำมั่นสัญญาของเรา</a></li>
+                <li><a href="{{ url_for('new_booking') }}">📅 จองคิวบริการออนไลน์</a></li>
+                <li><a href="{{ url_for('terms') }}">📋 ข้อกำหนดการใช้บริการ</a></li>
+                <li><a href="{{ url_for('privacy_policy') }}">🔒 นโยบายความเป็นส่วนตัว</a></li>
+                <li><a href="{{ url_for('login') }}">🔑 เข้าสู่ระบบสมาชิก</a></li>
+                <li><a href="{{ url_for('register') }}">📝 สมัครสมาชิกใหม่</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- แถบลิขสิทธิ์ด้านล่าง -->
+    <div class="footer-bottom-bar">
+        <p>© 2026 Cat Spa & Grooming. All rights reserved. ดูแลน้องแมวด้วยหัวใจ ♡</p>
+        <div class="footer-legal-links">
+            <a href="{{ url_for('terms') }}">ข้อกำหนดและเงื่อนไข</a>
+            <span>·</span>
+            <a href="{{ url_for('privacy_policy') }}">นโยบายความเป็นส่วนตัว</a>
+            <span>·</span>
+            <a href="#home">กลับขึ้นด้านบน ↑</a>
+        </div>
+    </div>
+</footer>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. สลับแท็บสีชมพูตามการคลิก และการเลื่อนหน้าจอ (Active Tab Switching & Scrollspy)
+    const navLinks = document.querySelectorAll(".nav-menu a");
+    const sections = [
+        { id: "home", link: document.querySelector('.nav-menu a[href="#home"]') },
+        { id: "services", link: document.querySelector('.nav-menu a[href="#services"]') },
+        { id: "packages", link: document.querySelector('.nav-menu a[href="#packages"]') },
+        { id: "about", link: document.querySelector('.nav-menu a[href="#about"]') },
+        { id: "contact", link: document.querySelector('.nav-menu a[href="#contact"]') }
+    ];
+
+    function setActiveTab(link) {
+        if (!link) return;
+        navLinks.forEach(function (a) { a.classList.remove("active"); });
+        link.classList.add("active");
+    }
+
+    let isClickScrolling = false;
+    let clickTimer = null;
+
+    // คลิกแท็บแล้วเปลี่ยนสีชมพูทันที และเลื่อนไปยังส่วนนั้นอย่างนุ่มนวล
+    navLinks.forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            const href = this.getAttribute("href");
+            if (href && href.startsWith("#")) {
+                const targetElem = document.querySelector(href);
+                if (targetElem) {
+                    e.preventDefault();
+                    setActiveTab(this);
+                    isClickScrolling = true;
+                    clearTimeout(clickTimer);
+
+                    // คำนวณความสูง Navbar เพื่อไม่ให้ Navbar บังหัวข้อ
+                    const navbar = document.querySelector(".navbar");
+                    const navHeight = navbar ? navbar.offsetHeight : 76;
+                    const targetTop = targetElem.getBoundingClientRect().top + window.pageYOffset - navHeight;
+
+                    window.scrollTo({
+                        top: Math.max(0, targetTop),
+                        behavior: "smooth"
+                    });
+
+                    // ป้องกัน Scrollspy รบกวนระหว่างแอนิเมชันเลื่อนหน้าจอ
+                    clickTimer = setTimeout(function () {
+                        isClickScrolling = false;
+                    }, 800);
+                }
+            }
+        });
+    });
+
+    // เลื่อนหน้าจอแล้วแท็บเปลี่ยนสีชมพูตามตำแหน่งปัจจุบัน (Scrollspy)
+    function onScrollSpy() {
+        if (isClickScrolling) return;
+
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const docHeight = document.documentElement.scrollHeight;
+
+        // เลื่อนใกล้ขอบล่างสุดของเว็บ ให้ไฮไลต์ "ติดต่อเรา"
+        if ((scrollY + windowHeight) >= docHeight - 80) {
+            const contactSec = sections.find(function (s) { return s.id === "contact"; });
+            if (contactSec && contactSec.link) {
+                setActiveTab(contactSec.link);
+            }
+            return;
+        }
+
+        // กรณีอยู่บนสุด
+        if (scrollY < 200) {
+            setActiveTab(sections[0].link);
+            return;
+        }
+
+        // ตรวจสอบจากล่างขึ้นบน
+        for (let i = sections.length - 1; i >= 0; i--) {
+            const sec = sections[i];
+            const elem = document.getElementById(sec.id);
+            if (elem) {
+                const rect = elem.getBoundingClientRect();
+                if (rect.top <= 200 && rect.bottom > 100) {
+                    setActiveTab(sec.link);
+                    break;
+                }
+            }
+        }
+    }
+
+    window.addEventListener("scroll", onScrollSpy, { passive: true });
+
+    // 2. แสดงเนื้อหาอย่างนุ่มนวลเมื่อเลื่อนมาถึง (Reveal Animation)
+    const items = document.querySelectorAll(".reveal");
+    if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        items.forEach(function (item) {
+            observer.observe(item);
+        });
+    } else {
+        items.forEach(function (item) {
+            item.classList.add("visible");
+        });
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพิ่มข้อมูลแมว - Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="cat-page-body">
+
+<div class="cat-form-container">
+
+    <div class="form-header">
+        <div class="form-icon-bubble">🐱</div>
+        <h1>เพิ่มข้อมูลน้องแมว</h1>
+        <p>กรอกข้อมูลและเพิ่มรูปภาพน้องแมวของคุณ เพื่อเริ่มจองบริการ</p>
+    </div>
+
+    <form method="POST"
+          action="{{ url_for('add_cat') }}"
+          enctype="multipart/form-data"
+          class="cat-form">
+
+        <!-- ชื่อแมว -->
+        <div class="form-group">
+            <label for="cat_name" class="form-label">
+                <span>🐱 ชื่อแมว</span>
+                <span class="required-star">*</span>
+            </label>
+            <input
+                type="text"
+                id="cat_name"
+                name="cat_name"
+                class="form-control"
+                placeholder="เช่น มิ่งขวัญ, มะลิ, มีโชค"
+                required
+            >
+        </div>
+
+        <!-- รูปภาพแมว -->
+        <div class="form-group">
+            <label class="form-label">
+                <span>📸 รูปภาพน้องแมว</span>
+            </label>
+
+            <div class="photo-edit-wrapper">
+                <div class="upload-box">
+                    <label for="image" class="upload-dropzone" id="dropzoneLabel">
+                        <span class="dropzone-icon">📁</span>
+                        <strong class="dropzone-title" id="dropzoneText">คลิกเพื่อเลือกรูปภาพน้องแมว</strong>
+                        <p class="dropzone-hint">รองรับไฟล์ JPG, PNG, WEBP (ขนาดไม่เกิน 5 MB)</p>
+                        <span class="dropzone-btn">เลือกไฟล์ภาพ</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        class="file-input-hidden"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    >
+                </div>
+            </div>
+
+            <!-- ส่วนแสดงตัวอย่างรูปใหม่แบบสด (Live Preview) -->
+            <div class="image-preview" id="previewContainer" style="display: none;">
+                <p class="preview-title">✨ ตัวอย่างรูปภาพที่เลือก:</p>
+                <img id="preview" alt="ตัวอย่างรูปภาพแมว" class="preview-img">
+            </div>
+        </div>
+
+        <!-- สายพันธุ์ & ลักษณะขน (2 คอลัมน์) -->
+        <div class="form-row-2">
+            <div class="form-group">
+                <label for="breed" class="form-label">
+                    <span>🧬 สายพันธุ์</span>
+                </label>
+                <input
+                    type="text"
+                    id="breed"
+                    name="breed"
+                    class="form-control"
+                    placeholder="เช่น เปอร์เซีย, สก็อตติช โฟลด์, แมวไทย"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="coat_type" class="form-label">
+                    <span>✂️ ลักษณะขน</span>
+                </label>
+                <div class="select-wrapper">
+                    <select id="coat_type" name="coat_type" class="form-control form-select">
+                        <option value="">-- เลือกลักษณะขน --</option>
+                        <option value="ขนสั้น">ขนสั้น</option>
+                        <option value="ขนกึ่งยาว">ขนกึ่งยาว</option>
+                        <option value="ขนยาว">ขนยาว</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- เพศ, อายุ, น้ำหนัก (3 คอลัมน์) -->
+        <div class="form-row-3">
+            <div class="form-group">
+                <label for="gender" class="form-label">
+                    <span>⚧ เพศ</span>
+                </label>
+                <div class="select-wrapper">
+                    <select id="gender" name="gender" class="form-control form-select">
+                        <option value="">-- เลือกเพศ --</option>
+                        <option value="ตัวผู้">ตัวผู้ (♂️)</option>
+                        <option value="ตัวเมีย">ตัวเมีย (♀️)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="age" class="form-label">
+                    <span>🎂 อายุ (ปี)</span>
+                </label>
+                <input
+                    type="number"
+                    id="age"
+                    name="age"
+                    min="0"
+                    max="100"
+                    class="form-control"
+                    placeholder="เช่น 2"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="weight" class="form-label">
+                    <span>⚖️ น้ำหนัก (กก.)</span>
+                </label>
+                <input
+                    type="number"
+                    id="weight"
+                    name="weight"
+                    step="0.1"
+                    min="0"
+                    max="1000"
+                    class="form-control"
+                    placeholder="เช่น 4.5"
+                >
+            </div>
+        </div>
+
+        <!-- หมายเหตุ -->
+        <div class="form-group">
+            <label for="notes" class="form-label">
+                <span>📝 ข้อมูลและพฤติกรรมเพิ่มเติม / หมายเหตุ</span>
+            </label>
+            <textarea
+                id="notes"
+                name="notes"
+                rows="3"
+                class="form-control form-textarea"
+                placeholder="เช่น กลัวเสียงไดร์เป่าขน, ไม่ชอบตัดเล็บ, ขี้อ้อน, เป็นมิตร"
+            ></textarea>
+            <p class="form-help">ข้อมูลนี้จะช่วยให้พี่ ๆ ช่างสปาดูแลน้องได้อย่างเข้าใจ อ่อนโยน และปลอดภัยที่สุดค่ะ</p>
+        </div>
+
+        <!-- ปุ่มดำเนินการ -->
+        <div class="form-actions">
+            <button type="submit" class="save-cat-btn">
+                <span>💾</span> บันทึกข้อมูลแมว
+            </button>
+            <a href="{{ url_for('my_cats') }}" class="cancel-cat-btn">
+                ยกเลิก
+            </a>
+        </div>
+
+    </form>
+
+    <div class="form-footer-back">
+        <a href="{{ url_for('my_cats') }}">
+            ← กลับไปแมวของฉัน
+        </a>
+    </div>
+
+</div>
+
+<script>
+const imageInput = document.getElementById("image");
+const previewContainer = document.getElementById("previewContainer");
+const preview = document.getElementById("preview");
+const dropzoneText = document.getElementById("dropzoneText");
+
+imageInput.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) {
+        preview.src = "";
+        previewContainer.style.display = "none";
+        dropzoneText.textContent = "คลิกเพื่อเลือกรูปภาพน้องแมว";
+        return;
+    }
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        alert("กรุณาเลือกไฟล์ JPG, PNG หรือ WEBP เท่านั้นค่ะ");
+        this.value = "";
+        preview.src = "";
+        previewContainer.style.display = "none";
+        dropzoneText.textContent = "คลิกเพื่อเลือกรูปภาพน้องแมว";
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert("รูปภาพต้องมีขนาดไม่เกิน 5 MB ค่ะ");
+        this.value = "";
+        preview.src = "";
+        previewContainer.style.display = "none";
+        dropzoneText.textContent = "คลิกเพื่อเลือกรูปภาพน้องแมว";
+        return;
+    }
+
+    dropzoneText.textContent = "✓ เลือกไฟล์แล้ว: " + file.name;
+    preview.src = URL.createObjectURL(file);
+    previewContainer.style.display = "block";
+});
+</script>
+
+</body>
+</html>

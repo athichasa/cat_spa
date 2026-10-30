@@ -1,0 +1,130 @@
+{% extends "admin_base.html" %}
+
+{% block title %}จัดการสมาชิก | Cat Spa Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>👥 จัดการข้อมูลสมาชิก</h1>
+        <p>ค้นหาและตรวจสอบข้อมูลลูกค้า ประวัติการใช้บริการ และน้องแมวที่ลงทะเบียน</p>
+    </div>
+    <div class="header-actions">
+        <span style="font-size: 14px; font-weight: 700; color: #e85d87; background: #fff0f5; padding: 8px 16px; border-radius: 20px; border: 1px solid #f9d8e4;">
+            สมาชิกลูกค้าทั้งหมด: {{ members|length }} คน
+        </span>
+    </div>
+</div>
+
+<!-- ช่องค้นหาสมาชิก -->
+<div class="admin-filter-bar">
+    <div style="font-weight: 700; font-size: 14.5px; color: #55444b;">
+        🔍 ค้นหาข้อมูลสมาชิก
+    </div>
+
+    <form method="GET" action="{{ url_for('admin_members') }}" class="filter-search-form">
+        <input type="text" name="q" value="{{ keyword }}" placeholder="ค้นหาชื่อ, เบอร์โทร, หรืออีเมล..." class="admin-input" style="width: 280px;">
+        <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm">
+            ค้นหา
+        </button>
+        {% if keyword %}
+            <a href="{{ url_for('admin_members') }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                ✕ ล้าง
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- ตารางแสดงสมาชิก -->
+{% if members %}
+    <div class="admin-card" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive" style="border: none; border-radius: 0;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ชื่อสมาชิก</th>
+                        <th>เบอร์โทรศัพท์</th>
+                        <th>อีเมล</th>
+                        <th>วันที่สมัคร</th>
+                        <th style="text-align: center;">จำนวนแมว</th>
+                        <th style="text-align: center;">จำนวนคิว</th>
+                        <th style="text-align: right;">ยอดใช้จ่ายสำเร็จ</th>
+                        <th style="text-align: center;">รายละเอียด</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; border-radius: 50%; background: #ffe4ee; color: #e85d87; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                    {{ m['name'][:1] }}
+                                </div>
+                                <div>
+                                    <strong style="color: #3d3136; font-size: 15px;">{{ m['name'] }}</strong>
+                                    <div style="font-size: 12px; color: #88727d;">รหัส #{{ m['user_id'] }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if m['phone'] %}
+                                <a href="tel:{{ m['phone'] }}" style="color: #e85d87; text-decoration: none; font-weight: 600;">
+                                    📞 {{ m['phone'] }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m['email'] %}
+                                <a href="mailto:{{ m['email'] }}" style="color: #55444b; text-decoration: none;">
+                                    {{ m['email'] }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="font-size: 13px; color: #7f6e76;">{{ m['created_at'][:10] if m['created_at'] else '-' }}</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="display: inline-block; padding: 4px 10px; border-radius: 12px; background: #fff0f5; color: #e85d87; font-weight: 700; font-size: 13px;">
+                                🐱 {{ m['cat_count'] }} ตัว
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="display: inline-block; padding: 4px 10px; border-radius: 12px; background: #eef8ff; color: #0284c7; font-weight: 700; font-size: 13px;">
+                                📅 {{ m['booking_count'] }} ครั้ง
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <strong style="color: #15803d; font-size: 14.5px;">
+                                {{ "{:,}".format(m['total_spent'] or 0) }} ฿
+                            </strong>
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="{{ url_for('admin_member_detail', user_id=m['user_id']) }}" class="admin-btn admin-btn-outline-primary admin-btn-sm">
+                                ดูข้อมูลและแมว →
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="admin-empty-state">
+        <div class="admin-empty-icon">👥</div>
+        <h3>ไม่พบข้อมูลสมาชิก</h3>
+        <p>{% if keyword %}ไม่พบสมาชิกที่ตรงกับคำค้นหา '{{ keyword }}'{% else %}ยังไม่มีสมาชิกในระบบ{% endif %}</p>
+        {% if keyword %}
+            <div style="margin-top: 15px;">
+                <a href="{{ url_for('admin_members') }}" class="admin-btn admin-btn-primary admin-btn-sm">
+                    แสดงสมาชิกทั้งหมด
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

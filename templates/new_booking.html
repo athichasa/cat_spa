@@ -1,0 +1,5230 @@
+<!DOCTYPE html>
+
+<html lang="th">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>จองคิวบริการ | Cat Spa & Grooming</title>
+
+
+
+    <!-- Google Fonts Kanit -->
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
+
+    <!-- Leaflet.js สำหรับแผนที่ปักหมุดสถานที่รับ-ส่งน้องแมว (100% ฟรี ไม่มีค่าใช้จ่าย API) -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+    <style>
+
+        * {
+
+            box-sizing: border-box;
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+
+
+        body {
+
+            font-family: 'Kanit', sans-serif;
+
+            color: #44333a;
+
+            background: #fff8fa;
+
+            padding: 30px 16px 60px;
+
+            line-height: 1.6;
+
+        }
+
+
+
+        .booking-page-container {
+
+            max-width: 760px;
+
+            margin: 20px auto;
+
+            background: #ffffff;
+
+            border: 1.5px solid #f4dbe0;
+
+            border-radius: 26px;
+
+            padding: 36px 32px;
+
+            box-shadow: 0 16px 40px rgba(112, 70, 51, 0.08);
+
+        }
+
+
+
+        .booking-header {
+
+            text-align: center;
+
+            margin-bottom: 28px;
+
+            padding-bottom: 20px;
+
+            border-bottom: 1px solid #faebee;
+
+        }
+
+
+
+        .booking-icon-bubble {
+
+            width: 58px;
+
+            height: 58px;
+
+            margin: 0 auto 12px;
+
+            border-radius: 50%;
+
+            background: linear-gradient(135deg, #fff0f4, #ffe4ec);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 28px;
+
+            border: 2px solid #ffffff;
+
+            box-shadow: 0 6px 18px rgba(240, 93, 135, 0.2);
+
+        }
+
+
+
+        .booking-header h1 {
+
+            color: #d94771;
+
+            font-size: 26px;
+
+            font-weight: 800;
+
+            margin-bottom: 6px;
+
+        }
+
+
+
+        .booking-header p {
+
+            color: #7f6e76;
+
+            font-size: 14.5px;
+
+        }
+
+
+
+        .form-section {
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .form-section-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            color: #5a3b2c;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .required-star {
+
+            color: #e54343;
+
+        }
+
+
+
+        input[type="text"],
+
+        input[type="date"],
+
+        input[type="number"],
+
+        select,
+
+        textarea {
+
+            width: 100%;
+
+            padding: 12px 16px;
+
+            border: 1.5px solid #ecd8de;
+
+            border-radius: 14px;
+
+            background: #fffdfd;
+
+            font-family: inherit;
+
+            font-size: 15px;
+
+            color: #5a3b2c;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        input:focus,
+
+        select:focus,
+
+        textarea:focus {
+
+            outline: none;
+
+            border-color: #f05d87;
+
+            background: #ffffff;
+
+            box-shadow: 0 0 0 4px rgba(240, 93, 135, 0.15);
+
+        }
+
+
+
+        /* ปุ่มเลือกแพ็กเกจ */
+
+        .choose-package-btn {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            width: 100%;
+
+            margin-top: 10px;
+
+            padding: 12px;
+
+            color: #ffffff;
+
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+
+            border: none;
+
+            border-radius: 14px;
+
+            font-family: inherit;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow: 0 4px 14px rgba(240, 93, 135, 0.25);
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .choose-package-btn:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 8px 20px rgba(240, 93, 135, 0.35);
+
+        }
+
+
+
+        /* กล่องแสดงแพ็กเกจที่เลือก */
+
+        .selected-package-box {
+
+            display: none;
+
+            margin-top: 14px;
+
+            padding: 18px 20px;
+
+            background: #fff5f8;
+
+            border: 1.5px solid #f9ccd9;
+
+            border-radius: 16px;
+
+            box-shadow: 0 4px 14px rgba(240, 93, 135, 0.08);
+
+        }
+
+
+
+        .selected-package-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            gap: 12px;
+
+        }
+
+
+
+        .selected-package-header h3 {
+
+            color: #d94771;
+
+            font-size: 18px;
+
+            font-weight: 800;
+
+            margin-bottom: 4px;
+
+        }
+
+
+
+        .selected-package-desc {
+
+            color: #7f6e76;
+
+            font-size: 13.5px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .btn-change-pkg {
+
+            display: inline-block;
+
+            padding: 6px 14px;
+
+            font-size: 12.5px;
+
+            font-weight: 700;
+
+            color: #d94771;
+
+            background: #ffffff;
+
+            border: 1.5px solid #f9ccd9;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .btn-change-pkg:hover {
+
+            background: #f05d87;
+
+            color: #ffffff;
+
+            border-color: #f05d87;
+
+        }
+
+
+
+        /* =========================================================================
+
+           ระบบบริการรับ-ส่งน้องแมว (PET TAXI DELIVERY UI)
+
+           ส่วนนี้ควบคุมตัวเลือกรับ-ส่ง แผนที่ปักหมุด และช่องกรอกที่อยู่
+
+           ========================================================================= */
+
+        .delivery-section-wrap {
+
+            background: #fffdfd;
+
+            border: 1.5px solid #fae1e7;
+
+            border-radius: 20px;
+
+            padding: 22px 20px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .delivery-radio-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 12px;
+
+            margin-top: 12px;
+
+        }
+
+
+
+        .delivery-card-label {
+
+            display: block;
+
+            cursor: pointer;
+
+            user-select: none;
+
+        }
+
+
+
+        .delivery-card-label input[type="radio"] {
+
+            display: none;
+
+        }
+
+
+
+        .delivery-option-box {
+
+            height: 100%;
+
+            padding: 14px 16px;
+
+            background: #ffffff;
+
+            border: 1.5px solid #ecd8de;
+
+            border-radius: 16px;
+
+            transition: all 0.25s ease;
+
+            position: relative;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+        }
+
+
+
+        .delivery-card-label input[type="radio"]:checked + .delivery-option-box {
+
+            border-color: #f05d87;
+
+            background: #fff7f9;
+
+            box-shadow: 0 6px 18px rgba(240, 93, 135, 0.16);
+
+            transform: translateY(-2px);
+
+        }
+
+
+
+        .delivery-card-label input[type="radio"]:checked + .delivery-option-box::after {
+
+            content: "✓";
+
+            position: absolute;
+
+            top: 10px;
+
+            right: 12px;
+
+            width: 20px;
+
+            height: 20px;
+
+            border-radius: 50%;
+
+            background: #f05d87;
+
+            color: #ffffff;
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+
+        .delivery-option-top {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 6px;
+
+        }
+
+
+
+        .delivery-icon {
+
+            font-size: 24px;
+
+            line-height: 1;
+
+        }
+
+
+
+        .delivery-option-title {
+
+            font-size: 14.5px;
+
+            font-weight: 700;
+
+            color: #5a3b2c;
+
+        }
+
+
+
+        .delivery-badge-popular {
+
+            font-size: 10.5px;
+
+            font-weight: 800;
+
+            color: #ffffff;
+
+            background: #f05d87;
+
+            padding: 2px 7px;
+
+            border-radius: 8px;
+
+            display: inline-block;
+
+            margin-bottom: 4px;
+
+        }
+
+
+
+        .delivery-option-desc {
+
+            font-size: 12.5px;
+
+            color: #8c7870;
+
+            margin-bottom: 8px;
+
+            line-height: 1.4;
+
+        }
+
+
+
+        .delivery-option-price {
+
+            font-size: 14.5px;
+
+            font-weight: 800;
+
+            color: #d94771;
+
+            align-self: flex-start;
+
+        }
+
+
+
+        .delivery-free {
+
+            color: #2e8b57;
+
+        }
+
+
+
+        /* กล่องแผนที่ปักหมุดและที่อยู่ (แสดงเมื่อเลือกระบบรับ-ส่ง) */
+
+        .delivery-location-container {
+
+            display: none;
+
+            margin-top: 18px;
+
+            padding-top: 18px;
+
+            border-top: 1px dashed #f2ccd7;
+
+            animation: fadeIn 0.3s ease-in-out;
+
+        }
+
+
+
+        @keyframes fadeIn {
+
+            from { opacity: 0; transform: translateY(-6px); }
+
+            to { opacity: 1; transform: translateY(0); }
+
+        }
+
+
+
+        .map-header-bar {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .map-hint-text {
+
+            font-size: 13px;
+
+            color: #8c7870;
+
+        }
+
+
+
+        .btn-locate-me {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding: 7px 14px;
+
+            background: #fff0f4;
+
+            color: #d94771;
+
+            border: 1.5px solid #f9ccd9;
+
+            border-radius: 12px;
+
+            font-family: inherit;
+
+            font-size: 12.5px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .btn-locate-me:hover {
+
+            background: #f05d87;
+
+            color: #ffffff;
+
+            border-color: #f05d87;
+
+        }
+
+
+
+        /* ค้นหาสถานที่บนแผนที่ */
+
+        .map-search-wrap {
+
+            position: relative;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .map-search-input-group {
+
+            display: flex;
+
+            align-items: center;
+
+            background: #ffffff;
+
+            border: 1.5px solid #f6ccd8;
+
+            border-radius: 14px;
+
+            padding: 4px 6px 4px 12px;
+
+            box-shadow: 0 2px 8px rgba(240, 93, 135, 0.06);
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .map-search-input-group:focus-within {
+
+            border-color: #f05d87;
+
+            box-shadow: 0 0 0 3px rgba(240, 93, 135, 0.15);
+
+        }
+
+
+
+        .map-search-input-group .search-icon {
+
+            font-size: 15px;
+
+            margin-right: 8px;
+
+            color: #8c7870;
+
+        }
+
+
+
+        .map-search-input-group input {
+
+            flex: 1;
+
+            border: none;
+
+            outline: none;
+
+            font-family: inherit;
+
+            font-size: 13.5px;
+
+            color: #44372f;
+
+            background: transparent;
+
+            padding: 6px 0;
+
+        }
+
+
+
+        .map-search-input-group #btnClearSearch {
+
+            background: none;
+
+            border: none;
+
+            font-size: 18px;
+
+            color: #999;
+
+            cursor: pointer;
+
+            padding: 0 8px;
+
+            line-height: 1;
+
+        }
+
+
+
+        .map-search-input-group #btnClearSearch:hover {
+
+            color: #f05d87;
+
+        }
+
+
+
+        .btn-search-action {
+
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+
+            color: white;
+
+            border: none;
+
+            padding: 7px 16px;
+
+            border-radius: 10px;
+
+            font-family: inherit;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+            white-space: nowrap;
+
+        }
+
+
+
+        .btn-search-action:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow: 0 4px 12px rgba(240, 93, 135, 0.3);
+
+        }
+
+
+
+        .map-search-results {
+
+            position: absolute;
+
+            top: calc(100% + 6px);
+
+            left: 0;
+
+            right: 0;
+
+            background: #ffffff;
+
+            border: 1.5px solid #f6ccd8;
+
+            border-radius: 14px;
+
+            box-shadow: 0 10px 30px rgba(70, 30, 40, 0.12);
+
+            z-index: 1000;
+
+            max-height: 250px;
+
+            overflow-y: auto;
+
+        }
+
+
+
+        .search-result-item {
+
+            padding: 10px 14px;
+
+            border-bottom: 1px solid #fbeff2;
+
+            cursor: pointer;
+
+            transition: background 0.2s;
+
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 10px;
+
+            text-align: left;
+
+        }
+
+
+
+        .search-result-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+
+
+        .search-result-item:hover {
+
+            background: #fff0f4;
+
+        }
+
+
+
+        .search-result-title {
+
+            font-size: 13.5px;
+
+            font-weight: 700;
+
+            color: #5a3b2c;
+
+            margin-bottom: 2px;
+
+        }
+
+
+
+        .search-result-sub {
+
+            font-size: 12px;
+
+            color: #8c7870;
+
+            line-height: 1.4;
+
+        }
+
+
+
+        #pickupMap {
+
+            width: 100%;
+
+            height: 290px;
+
+            border-radius: 16px;
+
+            border: 1.5px solid #ecd8de;
+
+            box-shadow: 0 4px 14px rgba(112, 70, 51, 0.06);
+
+            margin-bottom: 14px;
+
+            z-index: 1;
+
+        }
+
+
+
+        .coords-display {
+
+            font-size: 11.5px;
+
+            color: #8c7870;
+
+            background: #fff8fa;
+
+            padding: 4px 10px;
+
+            border-radius: 8px;
+
+            display: inline-block;
+
+            margin-bottom: 12px;
+
+            border: 1px solid #fae5ea;
+
+        }
+
+
+
+        /* ป้ายแสดงพิกัดและระยะทางจากร้าน (คณะศึกษาศาสตร์ มข.) */
+
+        .store-loc-tag {
+
+            background: #fff0f5;
+
+            border: 1px solid #ffd1df;
+
+            color: #d6336c;
+
+            padding: 7px 14px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .distance-badge-box {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            background: #fff8fb;
+
+            border: 1.5px dashed #f689ad;
+
+            border-radius: 14px;
+
+            padding: 12px 18px;
+
+            margin: 10px 0 16px;
+
+            font-size: 14px;
+
+            color: #44333a;
+
+        }
+
+
+
+        /* ส่วนเลือกวิธีการชำระเงิน */
+
+        .payment-section-wrap {
+
+            background: #fffdfd;
+
+            border: 1.5px solid #fae1e7;
+
+            border-radius: 20px;
+
+            padding: 22px 20px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .payment-radio-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 14px;
+
+            margin-top: 12px;
+
+        }
+
+
+
+        @media (max-width: 650px) {
+
+            .payment-radio-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+
+
+        .payment-card-label {
+
+            display: block;
+
+            cursor: pointer;
+
+            user-select: none;
+
+        }
+
+
+
+        .payment-card-label input[type="radio"] {
+
+            display: none;
+
+        }
+
+
+
+        .payment-option-box {
+
+            height: 100%;
+
+            padding: 16px;
+
+            background: #ffffff;
+
+            border: 1.5px solid #ecd8de;
+
+            border-radius: 16px;
+
+            transition: all 0.25s ease;
+
+            position: relative;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+        }
+
+
+
+        .payment-card-label input[type="radio"]:checked + .payment-option-box {
+
+            border-color: #f05d87;
+
+            background: #fff7f9;
+
+            box-shadow: 0 6px 18px rgba(240, 93, 135, 0.16);
+
+            transform: translateY(-2px);
+
+        }
+
+
+
+        .payment-card-label input[type="radio"]:checked + .payment-option-box::after {
+
+            content: "✓";
+
+            position: absolute;
+
+            top: 10px;
+
+            right: 12px;
+
+            width: 22px;
+
+            height: 22px;
+
+            border-radius: 50%;
+
+            background: #f05d87;
+
+            color: #ffffff;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            display: grid;
+
+            place-items: center;
+
+        }
+
+
+
+        /* กล่องแสดง PromptPay QR Code */
+
+        .promptpay-container {
+
+            display: none;
+
+            margin-top: 18px;
+
+            background: #ffffff;
+
+            border: 2px solid #005a9c;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow: 0 8px 24px rgba(0, 90, 156, 0.12);
+
+        }
+
+
+
+        .promptpay-header {
+
+            background: #003d6b;
+
+            color: white;
+
+            padding: 12px 20px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+        }
+
+
+
+        .promptpay-header-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+
+
+        .promptpay-logo-badge {
+
+            background: white;
+
+            color: #003d6b;
+
+            font-weight: 900;
+
+            padding: 3px 8px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            letter-spacing: 0.5px;
+
+        }
+
+
+
+        .promptpay-content {
+
+            padding: 22px 20px;
+
+            text-align: center;
+
+        }
+
+
+
+        .qr-code-wrapper {
+
+            display: inline-block;
+
+            background: white;
+
+            padding: 12px;
+
+            border: 2px solid #e2e8f0;
+
+            border-radius: 16px;
+
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+
+            margin: 12px 0 16px;
+
+        }
+
+
+
+        .qr-code-wrapper img {
+
+            display: block;
+
+            width: 210px;
+
+            height: 210px;
+
+            object-fit: contain;
+
+        }
+
+
+
+        .slip-upload-box {
+
+            margin-top: 16px;
+
+            padding: 16px;
+
+            background: #f8fafc;
+
+            border: 2px dashed #cbd5e1;
+
+            border-radius: 14px;
+
+            text-align: center;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .slip-upload-box:hover {
+
+            border-color: #005a9c;
+
+            background: #f0f7ff;
+
+        }
+
+
+
+        .slip-preview-container {
+
+            display: none;
+
+            margin-top: 12px;
+
+        }
+
+
+
+        .slip-preview-img {
+
+            max-width: 180px;
+
+            max-height: 220px;
+
+            border-radius: 10px;
+
+            border: 2px solid #005a9c;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        }
+
+
+
+        /* กล่องสรุปค่าบริการรวม (Live Price Breakdown) */
+
+        .price-breakdown-box {
+
+            background: linear-gradient(135deg, #fff3f6, #fffaf5);
+
+            border: 1.5px solid #f7c5d3;
+
+            border-radius: 18px;
+
+            padding: 18px 22px;
+
+            margin-top: 24px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+
+        .price-breakdown-title {
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            color: #5a3b2c;
+
+            margin-bottom: 10px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+        }
+
+
+
+        .price-breakdown-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            font-size: 14px;
+
+            color: #705850;
+
+            padding: 5px 0;
+
+        }
+
+
+
+        .price-breakdown-total {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            font-size: 18px;
+
+            font-weight: 800;
+
+            color: #d94771;
+
+            padding-top: 10px;
+
+            margin-top: 6px;
+
+            border-top: 1.5px dashed #f6cfdc;
+
+        }
+
+
+
+        .price-breakdown-total strong {
+
+            font-size: 24px;
+
+        }
+
+
+
+        .submit-booking-btn {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            width: 100%;
+
+            padding: 15px 28px;
+
+            color: #ffffff;
+
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+
+            border: none;
+
+            border-radius: 16px;
+
+            font-family: inherit;
+
+            font-size: 16.5px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow: 0 8px 24px rgba(240, 93, 135, 0.35);
+
+            transition: all 0.28s ease;
+
+        }
+
+
+
+        .submit-booking-btn:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 12px 28px rgba(240, 93, 135, 0.45);
+
+        }
+
+
+
+        .back-link {
+
+            display: block;
+
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #d94771;
+
+            text-decoration: none;
+
+            font-weight: 600;
+
+            font-size: 14px;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .back-link:hover {
+
+            text-decoration: underline;
+
+            transform: translateX(-3px);
+
+        }
+
+
+
+        /* Modal Styles */
+
+        .modal {
+
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 1000;
+
+            padding: 20px;
+
+            overflow-y: auto;
+
+            background: rgba(40, 20, 30, 0.6);
+
+            backdrop-filter: blur(4px);
+
+        }
+
+
+
+        .modal-content {
+
+            max-width: 760px;
+
+            margin: 30px auto;
+
+            padding: 28px;
+
+            background: #ffffff;
+
+            border-radius: 24px;
+
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+        }
+
+
+
+        .modal-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .modal-header h2 {
+
+            color: #d94771;
+
+            font-size: 22px;
+
+            font-weight: 800;
+
+        }
+
+
+
+        .close-btn {
+
+            width: 34px;
+
+            height: 34px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #fce6ee;
+
+            color: #d94771;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            display: grid;
+
+            place-items: center;
+
+            transition: all 0.2s ease;
+
+        }
+
+
+
+        .close-btn:hover {
+
+            background: #f05d87;
+
+            color: #ffffff;
+
+        }
+
+
+
+        .package-list {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 16px;
+
+            margin-top: 20px;
+
+        }
+
+
+
+        .package-card {
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+            padding: 20px;
+
+            border: 1.5px solid #f0d5df;
+
+            border-radius: 18px;
+
+            background: #fffcfd;
+
+            transition: all 0.25s ease;
+
+        }
+
+
+
+        .package-card:hover {
+
+            border-color: #f05d87;
+
+            transform: translateY(-3px);
+
+            box-shadow: 0 8px 24px rgba(240, 93, 135, 0.12);
+
+        }
+
+
+
+        .package-card h3 {
+
+            color: #5a3b2c;
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+            margin-bottom: 6px;
+
+        }
+
+
+
+        .package-card p {
+
+            color: #7f6e76;
+
+            font-size: 13.5px;
+
+            line-height: 1.5;
+
+            flex: 1;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .package-card .price {
+
+            color: #d94771;
+
+            font-size: 20px;
+
+            font-weight: 800;
+
+            margin-bottom: 12px;
+
+        }
+
+
+
+        .select-package {
+
+            width: 100%;
+
+            padding: 10px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            color: #ffffff;
+
+            background: linear-gradient(135deg, #f05d87, #f78da7);
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+        }
+
+
+
+        .select-package:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow: 0 4px 12px rgba(240, 93, 135, 0.3);
+
+        }
+
+
+
+        .empty-message {
+
+            display: none;
+
+            text-align: center;
+
+            padding: 30px;
+
+            color: #8c7870;
+
+        }
+
+
+
+        @media (max-width: 650px) {
+
+            .booking-page-container {
+
+                padding: 24px 18px;
+
+            }
+
+            .delivery-radio-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .package-list {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+    
+
+        /* =========================================================================
+
+           ระบบเลือกพนักงานผู้เชี่ยวชาญ (STAFF SELECTION STYLES)
+
+           ========================================================================= */
+
+        .staff-radio-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+            gap: 14px;
+
+            margin-top: 10px;
+
+        }
+
+
+
+        .staff-card-label {
+
+            display: block;
+
+            cursor: pointer;
+
+            user-select: none;
+
+        }
+
+
+
+        .staff-card-label input[type="radio"] {
+
+            display: none;
+
+        }
+
+
+
+        .staff-option-box {
+
+            height: 100%;
+
+            padding: 16px;
+
+            background: #ffffff;
+
+            border: 1.5px solid #ecd8de;
+
+            border-radius: 18px;
+
+            transition: all 0.25s ease;
+
+            position: relative;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        .staff-card-label input[type="radio"]:checked + .staff-option-box {
+
+            border-color: #ed5682;
+
+            background: #fff8fa;
+
+            box-shadow: 0 6px 20px rgba(237, 86, 130, 0.16);
+
+            transform: translateY(-2px);
+
+        }
+
+
+
+        .staff-card-label input[type="radio"]:checked + .staff-option-box::after {
+            content: "✓";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ed5682;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 900;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 3px 8px rgba(237, 86, 130, 0.45);
+            border: 2px solid #ffffff;
+            z-index: 5;
+        }
+
+        .staff-spec-pill {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .no-break-phrase {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .staff-quote-box {
+            font-size: 11.5px;
+            color: #831843;
+            font-style: italic;
+            background: #fff0f5;
+            padding: 5px 9px;
+            border-radius: 7px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+
+
+        .staff-avatar-placeholder {
+
+            width: 52px;
+
+            height: 52px;
+
+            border-radius: 50%;
+
+            background: #fff0f5;
+
+            border: 2px solid #fce3ec;
+
+            display: grid;
+
+            place-items: center;
+
+            font-size: 26px;
+
+            flex-shrink: 0;
+
+        }
+
+
+
+        .staff-select-avatar {
+
+            width: 56px;
+
+            height: 56px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border: 2.5px solid #ed5682;
+
+            box-shadow: 0 4px 10px rgba(237, 86, 130, 0.2);
+
+            flex-shrink: 0;
+
+            background: white;
+
+        }
+
+
+
+        .staff-badge-auto {
+
+            font-size: 11px;
+
+            background: #e6fcf5;
+
+            color: #0ca678;
+
+            padding: 2px 8px;
+
+            border-radius: 6px;
+
+            font-weight: 700;
+
+            display: inline-block;
+
+        }
+
+
+
+        .staff-rating-badge {
+
+            font-size: 12px;
+
+            background: #fffbeb;
+
+            color: #b45309;
+
+            padding: 2px 7px;
+
+            border-radius: 8px;
+
+            font-weight: 700;
+
+            border: 1px solid #fde68a;
+
+            white-space: nowrap;
+
+        }
+
+
+
+        .staff-role-sub {
+
+            font-size: 11.5px;
+
+            color: #ed5682;
+
+            font-weight: 700;
+
+            margin-top: 2px;
+
+            line-height: 1.3;
+
+        }
+
+
+
+        .staff-mini-meta {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 11.5px;
+
+            color: #7f6e76;
+
+            margin-top: 4px;
+
+        }
+
+
+
+        .staff-status-pill {
+
+            font-size: 11px;
+
+            color: #059669;
+
+            font-weight: 700;
+
+            background: #ecfdf5;
+
+            padding: 2px 8px;
+
+            border-radius: 12px;
+
+        }
+
+
+
+        .btn-view-staff-reviews {
+
+            background: white;
+
+            color: #ed5682;
+
+            border: 1px solid #fbcfe8;
+
+            padding: 4px 10px;
+
+            border-radius: 10px;
+
+            font-size: 11.5px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+        }
+
+
+
+        .btn-view-staff-reviews:hover {
+
+            background: #fff0f5;
+
+            border-color: #ed5682;
+
+        }
+
+
+
+    </style>
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="booking-page-container">
+
+
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #faebee;">
+
+        <a href="{{ url_for('dashboard') }}" class="back-link" style="margin: 0; display: inline-flex; align-items: center; gap: 6px; color: #ed5682; font-weight: 700; text-decoration: none; font-size: 14px;">
+
+            ← กลับหน้าหลักลูกค้า
+
+        </a>
+
+
+
+        <!-- โหมดแจ้งเตือนสำหรับลูกค้า -->
+
+        <div class="notification-wrapper" id="notifWrapper">
+
+            <button type="button" class="notification-bell-btn" id="notifBellBtn" title="โหมดแจ้งเตือน">
+
+                <span>🔔</span>
+
+                {% if unread_notifications_count and unread_notifications_count > 0 %}
+
+                    <span class="notification-badge">{{ unread_notifications_count }}</span>
+
+                {% endif %}
+
+            </button>
+
+            <div class="notification-dropdown" id="notifDropdown">
+
+                <div class="notification-dropdown-header">
+
+                    <h4>🔔 โหมดแจ้งเตือน</h4>
+
+                    {% if unread_notifications_count and unread_notifications_count > 0 %}
+
+                        <span class="notif-count-pill">{{ unread_notifications_count }} รายการ</span>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="notification-dropdown-body">
+
+                    {% if customer_notifications %}
+
+                        {% for notif in customer_notifications %}
+
+                            {% if notif['payment_status'] == 'สลิปไม่ถูกต้อง' %}
+
+                                <div class="notification-item item-slip-rejected">
+
+                                    <div class="notif-item-icon">⚠️</div>
+
+                                    <div class="notif-item-content">
+
+                                        <strong class="notif-item-title">สลิปการโอนเงินไม่ถูกต้อง</strong>
+
+                                        <p class="notif-item-desc">
+
+                                            การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) น้อง{{ notif['cat_name'] }} แอดมินแจ้งว่าสลิปไม่ถูกต้อง กรุณาแนบใหม่
+
+                                        </p>
+
+                                        <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-orange">
+
+                                            📸 แนบสลิปใหม่ →
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            {% elif notif['status'] in ['ยกเลิก', 'ยกเลิกแล้ว', 'ปฏิเสธ'] %}
+
+                                <div class="notification-item item-cancelled">
+
+                                    <div class="notif-item-icon">❌</div>
+
+                                    <div class="notif-item-content">
+
+                                        <strong class="notif-item-title">การจองถูกยกเลิก</strong>
+
+                                        <p class="notif-item-desc">
+
+                                            การจอง #{{ notif['booking_id'] }} ({{ notif['service_name'] }}) วันที่ {{ notif['booking_date'] }} ถูกยกเลิกแล้ว
+
+                                        </p>
+
+                                        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+
+                                            <a href="{{ url_for('bookings') }}#booking-{{ notif['booking_id'] }}" class="notif-action-btn notif-btn-gray">
+
+                                                ดูรายการ →
+
+                                            </a>
+
+                                            <form method="POST" action="{{ url_for('dismiss_notification', booking_id=notif['booking_id']) }}" style="display: inline;">
+
+                                                <button type="submit" style="background: none; border: none; color: #9ca3af; font-size: 11px; cursor: pointer; text-decoration: underline;">
+
+                                                    ✓ รับทราบ
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="notification-empty">
+
+                            <span>✨</span>
+
+                            <p>ไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="booking-header">
+
+        <div class="booking-icon-bubble">🐾</div>
+
+        <h1>จองคิวบริการ Cat Spa & Grooming</h1>
+
+        <p>เลือกบริการที่เหมาะกับน้องแมว พร้อมบริการรับ-ส่งถึงที่บ้านเพื่อความสะดวกสบายของคุณ ♡</p>
+
+    </div>
+
+
+
+    {% if cats %}
+
+
+
+    <form method="POST" id="bookingForm" enctype="multipart/form-data">
+
+
+
+        <!-- 1. เลือกน้องแมว -->
+
+        <div class="form-section">
+
+            <label for="cat_id" class="form-section-title">
+
+                <span>🐱 1. เลือกน้องแมวที่ต้องการรับบริการ</span>
+
+                <span class="required-star">*</span>
+
+            </label>
+
+            <select name="cat_id" id="cat_id" required>
+
+                <option value="">-- เลือกน้องแมวของคุณ --</option>
+
+                {% for cat in cats %}
+
+                <option value="{{ cat['cat_id'] }}">
+
+                    {{ cat['cat_name'] }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+
+        <!-- 2. เลือกบริการและแพ็กเกจ -->
+
+        <div class="form-section">
+
+            <label for="category" class="form-section-title">
+
+                <span>✂️ 2. เลือกหมวดหมู่และแพ็กเกจบริการ</span>
+
+                <span class="required-star">*</span>
+
+            </label>
+
+            <select id="category" required>
+
+                <option value="">-- เลือกหมวดบริการ --</option>
+
+                {% for category_id, category_name in categories.items() %}
+
+                <option value="{{ category_id }}">
+
+                    {{ category_name }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+
+
+            <button type="button" class="choose-package-btn" id="openModal">
+
+                <span>✨</span> เลือกแพ็กเกจและดูรายละเอียด
+
+            </button>
+
+
+
+            <!-- ค่าแพ็กเกจที่เลือก (Hidden Input) -->
+
+            <input type="hidden" name="package_id" id="package_id" required>
+
+            <input type="hidden" id="packageBasePrice" value="0">
+
+
+
+            <!-- กล่องแสดงแพ็กเกจที่เลือกสำเร็จ -->
+
+            <div class="selected-package-box" id="selectedBox">
+
+                <div class="selected-package-header">
+
+                    <div>
+
+                        <h3 id="selectedName"></h3>
+
+                        <p class="selected-package-desc" id="selectedDescription"></p>
+
+                    </div>
+
+                    <button type="button" class="btn-change-pkg" id="changePackage">
+
+                        เปลี่ยนแพ็กเกจ
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 3. เลือกพนักงานผู้เชี่ยวชาญดูแลน้องแมว (Staff Selection) -->
+
+        <div class="form-section">
+
+            <div class="form-section-title">
+
+                <span>👩‍💼 3. เลือกพนักงานผู้เชี่ยวชาญดูแลน้องแมว (Staff Selection)</span>
+
+            </div>
+
+            <p style="font-size: 13.5px; color: #8c7870; margin-bottom: 12px;">
+
+                คุณสามารถเลือกผู้เชี่ยวชาญที่คุณไว้วางใจ หรือให้ทางร้านจัดสรรพี่เลี้ยงที่เหมาะสมและตรงกับคิวว่างให้ได้ค่ะ
+
+            </p>
+
+
+
+            <div class="staff-radio-grid">
+
+                <!-- ตัวเลือก: ให้ทางร้านจัดสรรให้อัตโนมัติ -->
+
+                <label class="staff-card-label">
+
+                    <input type="radio" name="staff_id" value="" {% if not preselected_staff_id %}checked{% endif %} data-name="ให้ร้านจัดสรรให้อัตโนมัติ" onchange="updateSelectedStaffSummary()">
+
+                    <div class="staff-option-box">
+
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+
+                            <div class="staff-avatar-placeholder">🏪</div>
+
+                            <div>
+
+                                <span class="staff-badge-auto">✨ จัดสรรตามคิวว่าง</span>
+
+                                <h4 style="margin: 4px 0 2px; font-size: 15px; color: #2b1820; font-weight: 800;">ให้ทางร้านจัดสรรให้อัตโนมัติ</h4>
+
+                                <p style="margin: 0; font-size: 12px; color: #7f6e76; line-height: 1.4;">
+
+                                    ระบบจะเลือกผู้เชี่ยวชาญที่ว่างตรงกับวันและเวลาที่คุณจอง สะดวกและรวดเร็ว
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- ตัวเลือกพนักงานทั้ง 3 คน (ต้นเตย, มีมี่, อุ๋มอิ๋ม) -->
+
+                {% for st in staff_list %}
+
+                <label class="staff-card-label">
+
+                    <input type="radio" name="staff_id" value="{{ st.staff_id }}" {% if preselected_staff_id == st.staff_id %}checked{% endif %} data-name="คุณ{{ st.nickname }}" onchange="updateSelectedStaffSummary()">
+
+                    <div class="staff-option-box">
+
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+
+                            <img src="{{ url_for('static', filename='images/' + st.image) }}" alt="{{ st.name }}" class="staff-select-avatar">
+
+                            <div style="flex: 1; min-width: 0;">
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+
+                                    <h4 style="margin: 0; font-size: 15px; color: #2b1820; font-weight: 800;">
+
+                                        คุณ{{ st.nickname }}
+
+                                        
+
+                                    </h4>
+
+                                    <span class="staff-rating-badge">⭐ {{ "%.1f"|format(st.rating or 5.0) }}</span>
+
+                                </div>
+
+                                <div class="staff-role-sub">{{ st.role_title }}</div>
+
+                                <div class="staff-mini-meta">
+
+                                    <span>🏆 ประสบการณ์ {{ st.experience_years }} ปี</span>
+
+                                    <span>🎯 ให้บริการ {{ st.service_count or 0 }}+ ครั้ง</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ความเชี่ยวชาญ & วันเวลา -->
+                        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #f2dce5;">
+                            <div style="font-size: 12px; color: #55444b; margin-bottom: 4px; line-height: 1.5;">
+                                <strong>✨ ถนัด:</strong>
+                                {% set specs = st.specialty_list or (st.specialties.split(',') if st.specialties else []) %}
+                                {% for spec in specs %}
+                                    <span class="staff-spec-pill">{{ spec.strip() }}</span>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="staff-quote-box">
+                                “{% set chunks = st.highlights_chunks or (st.highlights.split() if st.highlights else []) %}{% for chunk in chunks %}<span class="no-break-phrase">{{ chunk }}</span>{% if not loop.last %} {% endif %}{% endfor %}”
+                            </div>
+                        </div>
+
+
+
+                        <!-- ปุ่มดูรีวิวจากลูกค้า (Modal Trigger) -->
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+
+                            <span class="staff-status-pill">● {{ st.status_text or 'พร้อมให้บริการ' }}</span>
+
+                            <button type="button" class="btn-view-staff-reviews" onclick="openStaffReviewsModal({{ st.staff_id }}, 'คุณ{{ st.nickname }}'); event.stopPropagation();">
+
+                                💬 ดูรีวิวลูกค้า ({{ st.review_count or 0 }})
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </label>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 4. วันที่และเวลาจอง -->
+
+        <div class="form-section">
+
+            <label for="booking_date" class="form-section-title">
+
+                <span>📅 4. เลือกวันที่และเวลานัดหมาย</span>
+
+                <span class="required-star">*</span>
+
+            </label>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+
+                <div>
+
+                    <input type="date" name="booking_date" id="booking_date" required>
+
+                </div>
+
+                <div>
+
+                    <select name="booking_time" id="booking_time" required>
+
+                        <option value="">-- กรุณาเลือกวันที่ก่อน --</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================================================================
+
+             4. ระบบบริการรับ-ส่งน้องแมวถึงที่บ้าน (PET TAXI DELIVERY SERVICE)
+
+             ส่วนนี้แสดงตัวเลือกรับ-ส่ง การคำนวณตามระยะทางจริงจากร้าน (คณะศึกษาศาสตร์ มข.)
+
+             ========================================================================= -->
+
+        <div class="delivery-section-wrap">
+
+            <div class="form-section-title">
+
+                <span>🚗 5. บริการรับ-ส่งน้องแมวถึงที่บ้าน (Pet Taxi Service)</span>
+
+            </div>
+
+            
+
+            <div class="store-loc-tag">
+
+                🏪 พิกัดร้าน: สาขาใกล้คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (จุดคำนวณระยะทาง)
+
+            </div>
+
+
+
+            <p style="font-size: 13.5px; color: #8c7870; margin-bottom: 8px;">
+
+                พาน้องแมวมาผ่อนคลายได้ง่าย ๆ แม้ไม่มีเวลาเดินทาง ร้านของเราตั้งอยู่ใกล้คณะศึกษาศาสตร์ ม.ขอนแก่น พร้อมคำนวณค่าเดินทางตามระยะทางจริงอย่างโปร่งใสและเป็นธรรมค่ะ
+
+            </p>
+
+
+
+            <div class="delivery-radio-grid">
+
+                <!-- ตัวเลือกที่ 1: พาน้องมาเองที่ร้าน (ฟรี) -->
+
+                <label class="delivery-card-label">
+
+                    <input type="radio" name="delivery_type" value="none" checked data-type="none">
+
+                    <div class="delivery-option-box">
+
+                        <div>
+
+                            <div class="delivery-option-top">
+
+                                <span class="delivery-icon">🐾</span>
+
+                                <span class="delivery-option-title">พาน้องมาเองที่ร้าน</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">นำน้องแมวมาส่งและรับกลับที่ร้านด้วยตนเอง</p>
+
+                        </div>
+
+                        <span class="delivery-option-price delivery-free">ฟรี (+0 บาท)</span>
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- ตัวเลือกที่ 2: บริการรับและส่งกลับ (ไป-กลับ) -->
+
+                <label class="delivery-card-label">
+
+                    <input type="radio" name="delivery_type" value="round_trip" data-type="round_trip">
+
+                    <div class="delivery-option-box">
+
+                        <div>
+
+                            <span class="delivery-badge-popular">⭐ แนะนำ สะดวกสุด</span>
+
+                            <div class="delivery-option-top">
+
+                                <span class="delivery-icon">🚗</span>
+
+                                <span class="delivery-option-title">รับ-ส่ง ไปและกลับ</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">รับน้องจากบ้านมาสปา และส่งกลับบ้าน<br>
+
+                                (เริ่มต้น 70฿ + 18฿/กม.)</p>
+
+                        </div>
+
+                        <span class="delivery-option-price" id="labelFeeRoundTrip">คิดตามระยะทาง</span>
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- ตัวเลือกที่ 3: รับจากบ้านมาสปา (เที่ยวเดียว) -->
+
+                <label class="delivery-card-label">
+
+                    <input type="radio" name="delivery_type" value="pickup_only" data-type="pickup_only">
+
+                    <div class="delivery-option-box">
+
+                        <div>
+
+                            <div class="delivery-option-top">
+
+                                <span class="delivery-icon">🛵</span>
+
+                                <span class="delivery-option-title">รับมาสปา (เที่ยวเดียว)</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">รับน้องจากบ้านมาส่งที่ร้าน (เริ่มต้น 40฿ + 10฿/กม.)</p>
+
+                        </div>
+
+                        <span class="delivery-option-price" id="labelFeePickup">คิดตามระยะทาง</span>
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- ตัวเลือกที่ 4: พาน้องส่งกลับบ้าน (เที่ยวเดียว) -->
+
+                <label class="delivery-card-label">
+
+                    <input type="radio" name="delivery_type" value="dropoff_only" data-type="dropoff_only">
+
+                    <div class="delivery-option-box">
+
+                        <div>
+
+                            <div class="delivery-option-top">
+
+                                <span class="delivery-icon">🛵</span>
+
+                                <span class="delivery-option-title">ส่งกลับบ้าน (เที่ยวเดียว)</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">เจ้าของนำน้องมาส่งเอง แล้วให้ร้านพาส่งกลับบ้าน<br>
+
+                                (เริ่มต้น 40฿ + 10฿/กม.)</p>
+
+                        </div>
+
+                        <span class="delivery-option-price" id="labelFeeDropoff">คิดตามระยะทาง</span>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+
+
+            <!-- กล่องปักหมุดแผนที่และกรอกที่อยู่รับ-ส่ง (เปิดขึ้นมาเมื่อเลือกระบบรับ-ส่ง) -->
+
+            <div class="delivery-location-container" id="deliveryLocationContainer">
+
+                <div class="map-header-bar">
+
+                    <div>
+
+                        <strong style="color: #5a3b2c; font-size: 14.5px;">📍 ปักหมุดพิกัดสถานที่รับ-ส่งของคุณ</strong>
+
+                        <p class="map-hint-text">คลิกบนแผนที่ ลากหมุด หรือค้นหาสถานที่ ระบบจะอัปเดตที่อยู่และคำนวณระยะทางให้อัตโนมัติ</p>
+
+                    </div>
+
+                    <button type="button" class="btn-locate-me" id="btnLocateMe" title="คลิกเพื่อปักหมุดตามตำแหน่ง GPS ที่คุณยืนอยู่">
+
+                        <span>🎯</span> ใช้ตำแหน่งปัจจุบันของฉัน (GPS)
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- กล่องค้นหาสถานที่เพื่อปักหมุดง่ายขึ้น -->
+
+                <div class="map-search-wrap">
+
+                    <div class="map-search-input-group">
+
+                        <span class="search-icon">🔍</span>
+
+                        <input type="text" id="mapSearchInput" 
+
+                               placeholder="ค้นหาสถานที่ เช่น มหาวิทยาลัยขอนแก่น, เซ็นทรัล ขอนแก่น, กังสดาล, ซอย/ถนน..."
+
+                               autocomplete="off">
+
+                        <button type="button" id="btnClearSearch" title="ล้างคำค้นหา" style="display: none;">&times;</button>
+
+                        <button type="button" id="btnSearchPlace" class="btn-search-action">
+
+                            <span>ค้นหา</span>
+
+                        </button>
+
+                    </div>
+
+                    <!-- กล่องแสดงผลลัพธ์การค้นหาสถานที่ -->
+
+                    <div id="mapSearchResults" class="map-search-results" style="display: none;"></div>
+
+                </div>
+
+
+
+                <!-- แผนที่ Leaflet สำหรับปักหมุดตำแหน่ง -->
+
+                <div id="pickupMap"></div>
+
+
+
+                <!-- พิกัดละติจูด/ลองจิจูด และระยะทางที่ได้จากการปักหมุด (Hidden Inputs) -->
+
+                <input type="hidden" name="latitude" id="latitude">
+
+                <input type="hidden" name="longitude" id="longitude">
+
+                <input type="hidden" name="distance_km" id="distance_km" value="0">
+
+
+
+                <!-- แสดงระยะทางและค่าบริการที่คำนวณได้แบบสด -->
+
+                <div class="distance-badge-box" id="distanceBadgeBox">
+
+                    <div>
+
+                        📍 ระยะทางจากร้าน (คณะศึกษาศาสตร์ มข.): <strong id="distanceText" style="color: #d94771; font-size: 16px;">0.0</strong> กม.
+
+                    </div>
+
+                    <div>
+
+                        🚗 ค่าเดินทางที่คำนวณได้: <strong id="calculatedFeeText" style="color: #2b8a3e; font-size: 16px;">0</strong> บาท
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="coords-display" id="coordsDisplay">
+
+                    📍 พิกัดปักหมุด: <span id="coordsText">ยังไม่ได้เลือกจุดบนแผนที่ (คลิกที่แผนที่เพื่อปักหมุด)</span>
+
+                </div>
+
+
+
+                <!-- ช่องกรอกที่อยู่ละเอียดสำหรับรับ-ส่ง -->
+
+                <div style="margin-bottom: 14px;">
+
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+
+                        <label for="pickup_address" style="font-size: 14px; font-weight: 700; color: #5a3b2c; margin-bottom: 0;">
+
+                            🏠 ที่อยู่สำหรับรับ-ส่ง (บ้านเลขที่ / ชื่ออาคาร / คอนโด / ซอย / ถนน) <span class="required-star">*</span>
+
+                        </label>
+
+                        <div id="addressStatusHint" style="font-size: 12.5px; min-height: 18px;"></div>
+
+                    </div>
+
+                    <textarea name="pickup_address" id="pickup_address" rows="2"
+
+                              placeholder="เช่น 123/45 หอพัก/บ้าน ซอยกังสดาล ถ.มิตรภาพ ต.ในเมือง อ.เมือง ขอนแก่น"></textarea>
+
+                </div>
+
+
+
+                <!-- จุดสังเกตหรือคำแนะนำสำหรับคนขับ -->
+
+                <div>
+
+                    <label for="delivery_notes" style="display: block; font-size: 14px; font-weight: 700; color: #5a3b2c; margin-bottom: 6px;">
+
+                        🚩 จุดสังเกต หรือข้อควรระวังในการรับ-ส่ง
+
+                    </label>
+
+                    <input type="text" name="delivery_notes" id="delivery_notes"
+
+                           placeholder="เช่น หน้าหอมีร้านกาแฟ, รั้วสีขาว, โทรหาก่อนถึง 10 นาที">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 5. หมายเหตุเพิ่มเติม -->
+
+        <div class="form-section">
+
+            <label for="notes" class="form-section-title">
+
+                <span>💬 6. หมายเหตุเพิ่มเติมเกี่ยวกับน้องแมว (ถ้ามี)</span>
+
+            </label>
+
+            <textarea name="notes" id="notes" rows="2"
+
+                      placeholder="เช่น น้องแมวกลัวเสียงไดร์เป่าขน, แพ้แชมพูบางชนิด, ขี้อ้อนมาก"></textarea>
+
+        </div>
+
+
+
+        <!-- =========================================================================
+
+             6. ช่องทางการชำระเงิน (PAYMENT METHOD SELECTION)
+
+             เลือกได้ทั้ง ชำระหน้าร้าน (สำหรับคนมาร้านเอง) และ สแกน QR Code พร้อมแนบสลิป
+
+             ========================================================================= -->
+
+        <div class="payment-section-wrap">
+
+            <div class="form-section-title">
+
+                <span>💳 7. เลือกช่องทางการชำระเงิน</span>
+
+                <span class="required-star">*</span>
+
+            </div>
+
+            <p style="font-size: 13.5px; color: #8c7870; margin-bottom: 8px;">
+
+                เลือกวิธีชำระเงินที่สะดวกที่สุดสำหรับคุณ ลูกค้าที่พาน้องแมวมาเองสามารถเลือกชำระเงินหน้าร้านได้เลยค่ะ
+
+            </p>
+
+
+
+            <div class="payment-radio-grid">
+
+                <!-- ตัวเลือก: จ่ายเงินหน้าร้าน -->
+
+                <label class="payment-card-label" id="labelPayMethodShop">
+
+                    <input type="radio" name="payment_method" value="pay_at_shop" checked id="payMethodShop">
+
+                    <div class="payment-option-box" id="shopOptionBox">
+
+                        <div>
+
+                            <span class="delivery-badge-popular" id="shopBadgeTag" style="background: #e6fcf5; color: #0ca678;">✓ แนะนำสำหรับรับ-ส่งเอง</span>
+
+                            <span id="shopLockedTag" style="display: none; font-size: 11px; background: #ffe4e6; color: #e11d48; padding: 2px 8px; border-radius: 6px; font-weight: 700; margin-left: 6px;">🔒 เฉพาะรับ-ส่งเองหรือเที่ยวเดียว</span>
+
+                            <div class="delivery-option-top" style="margin-top: 6px;">
+
+                                <span class="delivery-icon">💵</span>
+
+                                <span class="delivery-option-title">ชำระเงินหน้าร้าน</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">ชำระด้วยเงินสดหรือสแกนจ่ายที่ร้าน<br>
+
+                                เมื่อพาน้องแมวมาส่งหรือรับกลับ</p>
+
+                        </div>
+
+                        <span style="font-size: 13px; font-weight: 700; color: #2b8a3e; margin-top: 10px;">ชำระในวันรับบริการ</span>
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- ตัวเลือก: สแกนคิวอาร์โค้ด -->
+
+                <label class="payment-card-label" id="labelPayMethodQR">
+
+                    <input type="radio" name="payment_method" value="qr_code" id="payMethodQR">
+
+                    <div class="payment-option-box" id="qrOptionBox">
+
+                        <div>
+
+                            <span class="delivery-badge-popular" style="background: #e7f5ff; color: #1971c2;">📱 สแกนจ่ายทันที</span>
+
+                            <div class="delivery-option-top" style="margin-top: 6px;">
+
+                                <span class="delivery-icon">📲</span>
+
+                                <span class="delivery-option-title">สแกน QR Code (พร้อมเพย์)</span>
+
+                            </div>
+
+                            <p class="delivery-option-desc">สแกนจ่ายผ่านแอปธนาคารได้ทุกธนาคาร<br>
+
+                                พร้อมแนบสลิปเพื่อยืนยันคิวทันที</p>
+
+                        </div>
+
+                        <span style="font-size: 13px; font-weight: 700; color: #005a9c; margin-top: 10px;">Thai QR Payment</span>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+
+
+            <!-- ข้อความแจ้งเตือนเมื่อเลือกรอบรับ-ส่งไปและกลับ (ล็อกให้สแกน QR Code เท่านั้น) -->
+
+            <div id="roundTripLockBadge" style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 14px; padding: 14px 18px; margin-top: 14px; font-size: 13.5px; color: #be123c; align-items: center; gap: 10px;">
+
+                <span style="font-size: 24px;">🔒</span>
+
+                <div>
+
+                    <strong>บริการรับและส่ง (ไป-กลับ) ต้องชำระเงินผ่านการสแกน QR Code เท่านั้น:</strong><br>
+
+                    ทางร้านจำเป็นต้องรบกวนให้ชำระเงินล่วงหน้าเพื่อทำการจองและยืนยันคิวรถรับ-ส่งค่ะ<br>
+
+                    (หากรับส่งเอง หรือรับ/ส่งเที่ยวเดียว สามารถเลือกชำระเงินหน้าร้านได้ตามปกติค่ะ)
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ข้อความแนะนำสำหรับชำระเงินหน้าร้าน -->
+
+            <div id="payAtShopNote" style="background: #fffaf0; border: 1.5px solid #fed7aa; border-radius: 14px; padding: 14px 18px; margin-top: 14px; font-size: 13.5px; color: #9a3412; display: flex; align-items: center; gap: 10px;">
+
+                <span style="font-size: 22px;">🏪</span>
+
+                <div>
+
+                    <strong>ท่านเลือกชำระเงินหน้าร้าน:</strong> สามารถชำระเงินสดหรือสแกน QR หน้าร้าน<br>
+
+                    ในวันที่พาน้องแมวมารับบริการได้เลยค่ะ ทางร้านจะล็อกคิวไว้ให้ทันทีหลังแอดมินยืนยัน
+
+                </div>
+
+            </div>
+
+
+
+            <!-- กล่องแสดง QR Code พร้อมเพย์ และช่องแนบสลิป (เปิดขึ้นมาเมื่อเลือก QR Code) -->
+
+            <div class="promptpay-container" id="promptpayContainer">
+
+                <div class="promptpay-header">
+
+                    <div class="promptpay-header-left">
+
+                        <span class="promptpay-logo-badge">PROMPTPAY</span>
+
+                        <span style="font-size: 14px; font-weight: 700;">Thai QR Payment</span>
+
+                    </div>
+
+                    <span style="font-size: 12.5px; opacity: 0.9;">สแกนได้ทุกธนาคาร</span>
+
+                </div>
+
+
+
+                <div class="promptpay-content">
+
+                    <div style="font-size: 16px; font-weight: 800; color: #003d6b; margin-bottom: 2px;">
+
+                        {{ shop_name or 'Cat Spa & Grooming (ใกล้คณะศึกษาศาสตร์ มข.)' }}
+
+                    </div>
+
+                    <div style="font-size: 13.5px; color: #64748b; margin-bottom: 12px;">
+
+                        พร้อมเพย์: <strong>{{ shop_promptpay or '064-697-2101' }}</strong>
+
+                    </div>
+
+
+
+                    <!-- ภาพ QR Code ที่สร้างขึ้นแบบไดนามิกตามยอดเงิน -->
+
+                    <div class="qr-code-wrapper">
+
+                        <img id="promptpayQrImg" src="" alt="PromptPay QR Code">
+
+                    </div>
+
+
+
+                    <div style="font-size: 15px; color: #1e293b; margin-bottom: 14px;">
+
+                        ยอดเงินที่ต้องชำระ: <strong id="qrTotalAmountText" style="font-size: 22px; color: #005a9c;">0</strong> บาท
+
+                    </div>
+
+
+
+                    <!-- ช่องอัปโหลดสลิปหลักฐานการชำระเงิน -->
+
+                    <div class="slip-upload-box">
+
+                        <label for="payment_slip" style="display: block; font-weight: 700; color: #1e293b; font-size: 14.5px; margin-bottom: 6px; cursor: pointer;">
+
+                            📸 แนบสลิปหลักฐานการโอนเงิน (คลิกเพื่อเลือกรูป)
+
+                        </label>
+
+                        <p style="font-size: 12.5px; color: #64748b; margin-bottom: 10px;">
+
+                            รองรับไฟล์ภาพ JPG, PNG, WEBP (ไม่เกิน 5 MB)
+
+                        </p>
+
+                        <input type="file" name="payment_slip" id="payment_slip" accept="image/*" style="display: block; margin: 0 auto; max-width: 280px; font-size: 13px;">
+
+
+
+                        <div class="slip-preview-container" id="slipPreviewContainer">
+
+                            <img id="slipPreviewImg" class="slip-preview-img" src="" alt="ตัวอย่างสลิป">
+
+                            <p style="font-size: 12.5px; color: #15803d; font-weight: 700; margin-top: 6px;">
+
+                                ✓ เลือกรูปภาพสลิปเรียบร้อยแล้ว
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================================================================
+
+             สรุปค่าบริการและยอดเรียกเก็บเงินแบบสด (LIVE BILLING & PRICING BREAKDOWN)
+
+             ส่วนนี้คำนวณราคาบริการหลัก + ค่าบริการรับ-ส่ง แสดงให้ลูกค้าเห็นชัดเจน
+
+             ========================================================================= -->
+
+        <div class="price-breakdown-box" id="priceBreakdownBox">
+
+            <div class="price-breakdown-title">
+
+                <span>🧾</span> สรุปค่าบริการและยอดชำระ
+
+            </div>
+
+            <div class="price-breakdown-row">
+
+                <span>ค่าบริการแพ็กเกจ (<span id="summaryServiceName">ยังไม่ได้เลือก</span>):</span>
+
+                <span id="summaryServicePrice">0 บาท</span>
+
+            </div>
+
+            <div class="price-breakdown-row" style="color: #be185d; font-size: 13.5px; font-weight: 600;">
+
+                <span>ผู้เชี่ยวชาญดูแลน้องแมว:</span>
+
+                <span id="summaryStaffName">ให้ร้านจัดสรรให้อัตโนมัติ</span>
+
+            </div>
+
+            <div class="price-breakdown-row">
+
+                <span>ค่าบริการรับ-ส่ง (<span id="summaryDeliveryType">พาน้องมาเองที่ร้าน</span>):</span>
+
+                <span id="summaryDeliveryFee">0 บาท</span>
+
+            </div>
+
+            <div class="price-breakdown-row" id="rowSummaryDistance" style="display: none; color: #c2255c; font-size: 13px;">
+
+                <span>• ระยะทางจากร้าน (คณะศึกษาศาสตร์ มข.):</span>
+
+                <span id="summaryDistanceText">0.0 กม.</span>
+
+            </div>
+
+            <div class="price-breakdown-row" style="color: #475569; font-size: 13px;">
+
+                <span>ช่องทางชำระเงิน:</span>
+
+                <span id="summaryPaymentMethodText">ชำระเงินหน้าร้าน</span>
+
+            </div>
+
+            <div class="price-breakdown-total">
+
+                <span>ยอดรวมสุทธิทั้งสิ้น:</span>
+
+                <span><strong id="summaryTotalPrice">0</strong> บาท</span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ปุ่มยืนยันการจอง -->
+
+        <button type="submit" class="submit-booking-btn">
+
+            <span>🐾</span> ยืนยันส่งคำขอจองคิว
+
+        </button>
+
+    </form>
+
+
+
+    {% else %}
+
+        <div style="text-align: center; padding: 40px 20px;">
+
+            <p style="font-size: 16px; color: #7f6e76; margin-bottom: 18px;">คุณยังไม่มีข้อมูลน้องแมวในระบบ กรุณาเพิ่มข้อมูลน้องแมวก่อนเริ่มจองคิวนะคะ</p>
+
+            <a href="{{ url_for('my_cats') }}" class="choose-package-btn" style="display: inline-flex; width: auto; padding: 12px 28px;">
+
+                ไปเพิ่มข้อมูลน้องแมว →
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+
+
+    <a href="{{ url_for('bookings') }}" class="back-link">
+
+        ← ดูประวัติการจองของฉัน
+
+    </a>
+
+</div>
+
+
+
+<!-- =========================================================================
+
+     MODAL เลือกแพ็กเกจบริการ
+
+     ========================================================================= -->
+
+<div class="modal" id="packageModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="modalTitle">เลือกแพ็กเกจ</h2>
+
+            <button type="button" class="close-btn" id="closeModal">✕</button>
+
+        </div>
+
+
+
+        <p style="color: #7f6e76; font-size: 14px; margin-bottom: 12px;">อ่านรายละเอียดและราคาเพื่อเลือกแพ็กเกจที่เหมาะสมกับน้องแมวของคุณ</p>
+
+
+
+        <div class="package-list">
+
+            {% for package_id, package in services.items() %}
+
+            <div class="package-card" data-category="{{ package['category'] }}">
+
+                <div>
+
+                    <h3>{{ package['name'] }}</h3>
+
+                    <p>{{ package['description'] }}</p>
+
+                </div>
+
+                <div>
+
+                    <div class="price">
+
+                        {{ "{:,}".format(package['price']) }} บาท
+
+                    </div>
+
+                    <button type="button" class="select-package"
+
+                        data-id="{{ package_id }}"
+
+                        data-name="{{ package['name'] }}"
+
+                        data-description="{{ package['description'] }}"
+
+                        data-price="{{ package['price'] }}">
+
+                        เลือกแพ็กเกจนี้
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+
+        <p class="empty-message" id="emptyMessage">ไม่พบแพ็กเกจในหมวดนี้</p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================================
+
+     JAVASCRIPT ควบคุมการทำงานของหน้าจองคิว, แผนที่ปักหมุด, และการคำนวณราคา
+
+     ========================================================================= -->
+
+<script>
+
+    // =========================================================================
+
+    // 1. ประกาศตัวแปรอ้างอิง DOM Elements ทั้งหมดที่ด้านบนสุด (ป้องกัน TDZ Error)
+
+    // =========================================================================
+
+    const SHOP_LAT = parseFloat("{{ shop_lat or 16.4743 }}") || 16.4743;
+
+    const SHOP_LNG = parseFloat("{{ shop_lng or 102.8225 }}") || 102.8225;
+
+    const SHOP_PROMPTPAY = "{{ (shop_promptpay or '064-697-2101') }}";
+
+
+
+    const categoryNames = {
+
+        bath: "อาบน้ำแมว",
+
+        spa: "สปาแมว",
+
+        haircut: "ตัดแต่งขน",
+
+        nails: "ตัดเล็บ"
+
+    };
+
+
+
+    const deliveryTypeNames = {
+
+        none: "พาน้องมาเองที่ร้าน",
+
+        round_trip: "รับ-ส่ง ไปและกลับ",
+
+        pickup_only: "รับมาสปา (เที่ยวเดียว)",
+
+        dropoff_only: "ส่งกลับบ้าน (เที่ยวเดียว)"
+
+    };
+
+
+
+    // หมวดหมู่และแพ็กเกจ
+
+    const categorySelect = document.getElementById("category");
+
+    const modal = document.getElementById("packageModal");
+
+    const modalTitle = document.getElementById("modalTitle");
+
+    const packageCards = document.querySelectorAll(".package-card");
+
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    const packageInput = document.getElementById("package_id");
+
+    const packageBasePriceInput = document.getElementById("packageBasePrice");
+
+    const selectedBox = document.getElementById("selectedBox");
+
+
+
+    // วันที่และเวลานัดหมาย (Section 3)
+
+    const dateInput = document.getElementById("booking_date");
+
+    const bookingTimeSelect = document.getElementById("booking_time");
+
+
+
+    // บริการรับ-ส่งน้องแมว (Section 4)
+
+    const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');
+
+    const deliveryLocationContainer = document.getElementById("deliveryLocationContainer");
+
+    const pickupAddressInput = document.getElementById("pickup_address");
+
+    const latInput = document.getElementById("latitude");
+
+    const lngInput = document.getElementById("longitude");
+
+    const distanceInput = document.getElementById("distance_km");
+
+    const coordsText = document.getElementById("coordsText");
+
+    const distanceText = document.getElementById("distanceText");
+
+    const calculatedFeeText = document.getElementById("calculatedFeeText");
+
+    const btnLocateMe = document.getElementById("btnLocateMe");
+
+
+
+    // วิธีการชำระเงิน (Section 6)
+
+    const payMethodShop = document.getElementById("payMethodShop");
+
+    const payMethodQR = document.getElementById("payMethodQR");
+
+    const promptpayContainer = document.getElementById("promptpayContainer");
+
+    const payAtShopNote = document.getElementById("payAtShopNote");
+
+    const summaryPaymentMethodText = document.getElementById("summaryPaymentMethodText");
+
+    const promptpayQrImg = document.getElementById("promptpayQrImg");
+
+    const qrTotalAmountText = document.getElementById("qrTotalAmountText");
+
+    const paymentSlipInput = document.getElementById("payment_slip");
+
+    const slipPreviewContainer = document.getElementById("slipPreviewContainer");
+
+    const slipPreviewImg = document.getElementById("slipPreviewImg");
+
+
+
+    // =========================================================================
+
+    // 2. ระบบเลือกวันที่และโหลดเวลาว่างอัตโนมัติ (Date & Time Picker - Section 3)
+
+    // =========================================================================
+
+    if (dateInput && bookingTimeSelect) {
+
+        // จำกัดวันที่ห้ามเลือกย้อนหลัง
+
+        const now = new Date();
+
+        const localToday = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+        dateInput.min = localToday;
+
+
+
+        // รองรับกรณีส่ง date มาทาง URL เช่น ?date=2026-10-27
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const prefillDate = urlParams.get('date');
+
+        if (prefillDate && prefillDate >= localToday) {
+
+            dateInput.value = prefillDate;
+
+        }
+
+
+
+        async function loadAvailableTimes() {
+
+            const selectedDate = dateInput.value;
+
+            if (!selectedDate) {
+
+                bookingTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+
+                return;
+
+            }
+
+
+
+            bookingTimeSelect.innerHTML = '<option value="">-- กำลังตรวจสอบเวลาว่าง... --</option>';
+
+
+
+            try {
+
+                const response = await fetch(`/bookings/available-times?date=${encodeURIComponent(selectedDate)}`);
+
+                const data = await response.json();
+
+
+
+                if (!response.ok) {
+
+                    bookingTimeSelect.innerHTML = '<option value="">ไม่สามารถโหลดเวลาได้ (' + (data.error || 'ข้อผิดพลาด') + ')</option>';
+
+                    return;
+
+                }
+
+
+
+                if (!data.available_times || data.available_times.length === 0) {
+
+                    bookingTimeSelect.innerHTML = '<option value="">ไม่มีเวลาว่างในวันนี้</option>';
+
+                    return;
+
+                }
+
+
+
+                bookingTimeSelect.innerHTML = '<option value="">-- เลือกเวลานัดหมาย --</option>';
+
+                data.available_times.forEach(function(slot) {
+
+                    const opt = document.createElement("option");
+
+                    opt.value = slot;
+
+                    opt.textContent = slot + " น.";
+
+                    bookingTimeSelect.appendChild(opt);
+
+                });
+
+            } catch (err) {
+
+                console.error("Failed to load available times:", err);
+
+                bookingTimeSelect.innerHTML = '<option value="">โหลดเวลาว่างไม่สำเร็จ กรุณาลองใหม่</option>';
+
+            }
+
+        }
+
+
+
+        // ผูก Event ทั้ง change และ input เพื่อรองรับ datepicker ทุกเบราว์เซอร์
+
+        dateInput.addEventListener("change", loadAvailableTimes);
+
+        dateInput.addEventListener("input", loadAvailableTimes);
+
+
+
+        // Fallback: หากลูกค้าคลิกที่กล่องเลือกเวลาแล้วยังไม่มีตัวเลือก ให้โหลดซ้ำทันที
+
+        bookingTimeSelect.addEventListener("focus", function() {
+
+            if (dateInput.value && bookingTimeSelect.options.length <= 1) {
+
+                loadAvailableTimes();
+
+            }
+
+        });
+
+        bookingTimeSelect.addEventListener("click", function() {
+
+            if (dateInput.value && bookingTimeSelect.options.length <= 1) {
+
+                loadAvailableTimes();
+
+            }
+
+        });
+
+
+
+        // ถ้ามีค่าเริ่มต้นอยู่แล้ว ให้โหลดเวลาทันที
+
+        if (dateInput.value) {
+
+            loadAvailableTimes();
+
+        }
+
+    }
+
+
+
+    // =========================================================================
+
+    // 3. การเปิด-ปิด Modal เลือกแพ็กเกจ (Modal & Package Selection)
+
+    // =========================================================================
+
+    function openPackageModal() {
+
+        const category = categorySelect.value;
+
+        if (!category) {
+
+            alert("กรุณาเลือกหมวดบริการก่อนค่ะ");
+
+            return;
+
+        }
+
+
+
+        modalTitle.textContent = "แพ็กเกจ" + (categoryNames[category] || "");
+
+        let visibleCount = 0;
+
+
+
+        packageCards.forEach(function(card) {
+
+            const match = card.dataset.category === category;
+
+            card.style.display = match ? "flex" : "none";
+
+            if (match) visibleCount++;
+
+        });
+
+
+
+        emptyMessage.style.display = visibleCount === 0 ? "block" : "none";
+
+        modal.style.display = "block";
+
+    }
+
+
+
+    const openModalBtn = document.getElementById("openModal");
+
+    const changePackageBtn = document.getElementById("changePackage");
+
+    const closeModalBtn = document.getElementById("closeModal");
+
+
+
+    if (openModalBtn) openModalBtn.addEventListener("click", openPackageModal);
+
+    if (changePackageBtn) changePackageBtn.addEventListener("click", openPackageModal);
+
+    if (closeModalBtn) {
+
+        closeModalBtn.addEventListener("click", function() {
+
+            modal.style.display = "none";
+
+        });
+
+    }
+
+    if (modal) {
+
+        modal.addEventListener("click", function(event) {
+
+            if (event.target === modal) {
+
+                modal.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+
+    document.querySelectorAll(".select-package").forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            packageInput.value = this.dataset.id;
+
+            packageBasePriceInput.value = this.dataset.price;
+
+
+
+            document.getElementById("selectedName").textContent = this.dataset.name;
+
+            document.getElementById("selectedDescription").textContent = this.dataset.description;
+
+            selectedBox.style.display = "block";
+
+            modal.style.display = "none";
+
+
+
+            updatePriceBreakdown();
+
+        });
+
+    });
+
+
+
+    if (categorySelect) {
+
+        categorySelect.addEventListener("change", function() {
+
+            packageInput.value = "";
+
+            packageBasePriceInput.value = "0";
+
+            selectedBox.style.display = "none";
+
+            updatePriceBreakdown();
+
+        });
+
+    }
+
+
+
+    // Auto-select category or package from URL query parameters (e.g. ?service_id=5 or ?category=bath)
+
+    const urlBookingParams = new URLSearchParams(window.location.search);
+
+    const prefillCategory = urlBookingParams.get('category');
+
+    if (prefillCategory && categorySelect) {
+
+        if (categorySelect.querySelector(`option[value="${prefillCategory}"]`)) {
+
+            categorySelect.value = prefillCategory;
+
+        }
+
+    }
+
+
+
+    const prefillServiceId = urlBookingParams.get('service_id') || urlBookingParams.get('package_id');
+
+    if (prefillServiceId) {
+
+        const targetBtn = document.querySelector(`.select-package[data-id="${prefillServiceId}"]`);
+
+        if (targetBtn) {
+
+            const card = targetBtn.closest('.package-card');
+
+            if (card && card.dataset.category && categorySelect) {
+
+                categorySelect.value = card.dataset.category;
+
+            }
+
+            targetBtn.click();
+
+        }
+
+    }
+
+
+
+    // =========================================================================
+
+    // 4. การคำนวณระยะทางและราคา (Haversine & Dynamic Price Calculation)
+
+    // =========================================================================
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+
+        if (!lat1 || !lon1 || !lat2 || !lon2) return 0.0;
+
+        const R = 6371; // รัศมีโลกในหน่วยกิโลเมตร
+
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+
+        const a = 
+
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        const d = R * c;
+
+        return Math.round(d * 10) / 10;
+
+    }
+
+
+
+    function getDeliveryFee(deliveryType, distKm) {
+
+        if (deliveryType === 'none' || !deliveryType) return 0;
+
+        const dist = Math.max(0, parseFloat(distKm) || 0);
+
+
+
+        if (deliveryType === 'pickup_only' || deliveryType === 'dropoff_only') {
+
+            if (dist <= 2.0) return 40;
+
+            return Math.round(40 + ((dist - 2.0) * 10));
+
+        }
+
+        if (deliveryType === 'round_trip') {
+
+            if (dist <= 2.0) return 70;
+
+            return Math.round(70 + ((dist - 2.0) * 18));
+
+        }
+
+        return 0;
+
+    }
+
+
+
+    // ฟังก์ชันสร้าง EMVCo Payload สำหรับ PromptPay QR ฝั่ง Client (สำรอง)
+
+    function generatePromptPayPayloadJS(mobile, amount) {
+
+        let clean = String(mobile).replace(/[^0-9]/g, '');
+
+        if (clean.startsWith('0')) {
+
+            clean = '0066' + clean.substring(1);
+
+        } else {
+
+            clean = '0066' + clean;
+
+        }
+
+
+
+        const sub00 = "0016A000000677010111";
+
+        const sub01 = "01" + String(clean.length).padStart(2, '0') + clean;
+
+        const tag29Val = sub00 + sub01;
+
+        const tag29 = "29" + String(tag29Val.length).padStart(2, '0') + tag29Val;
+
+
+
+        const pointOfInit = (amount && Number(amount) > 0) ? "12" : "11";
+
+        let parts = [
+
+            "000201",
+
+            "0102" + pointOfInit,
+
+            tag29,
+
+            "5802TH",
+
+            "5303764"
+
+        ];
+
+
+
+        if (amount && Number(amount) > 0) {
+
+            const amtStr = Number(amount).toFixed(2);
+
+            parts.push("54" + String(amtStr.length).padStart(2, '0') + amtStr);
+
+        }
+
+
+
+        const raw = parts.join('') + "6304";
+
+        let crc = 0xFFFF;
+
+        for (let i = 0; i < raw.length; i++) {
+
+            crc ^= (raw.charCodeAt(i) << 8);
+
+            for (let j = 0; j < 8; j++) {
+
+                if (crc & 0x8000) crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+
+                else crc = (crc << 1) & 0xFFFF;
+
+            }
+
+        }
+
+        const crcHex = (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+
+        return raw + crcHex;
+
+    }
+
+
+
+    function updatePromptPayQR(totalAmount) {
+
+        if (!promptpayQrImg) return;
+
+        if (qrTotalAmountText) {
+
+            qrTotalAmountText.textContent = Number(totalAmount).toLocaleString("th-TH");
+
+        }
+
+
+
+        const cleanPhone = SHOP_PROMPTPAY.replace(/[^0-9]/g, '');
+
+        // ใช้ Local PromptPay QR API สร้างรูปภาพ QR Code พร้อมเพย์มาตรฐาน EMVCo พร้อมยอดเงินแบบสดๆ
+
+        const localApiUrl = `/api/promptpay-qr?amount=${totalAmount}&phone=${cleanPhone}&_t=${new Date().getTime()}`;
+
+        promptpayQrImg.src = localApiUrl;
+
+
+
+        promptpayQrImg.onerror = function() {
+
+            // สำรองหากเกิดข้อผิดพลาดในการโหลดรูป ให้ใช้ EMVCo Payload กับ QR Server
+
+            const emvcoPayload = generatePromptPayPayloadJS(cleanPhone, totalAmount);
+
+            promptpayQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(emvcoPayload)}`;
+
+        };
+
+    }
+
+
+
+    function updatePaymentMethodView() {
+
+        if (!summaryPaymentMethodText) return;
+
+        if (payMethodQR && payMethodQR.checked) {
+
+            if (promptpayContainer) promptpayContainer.style.display = "block";
+
+            if (payAtShopNote) payAtShopNote.style.display = "none";
+
+            summaryPaymentMethodText.textContent = "สแกน QR Code (พร้อมเพย์)";
+
+            summaryPaymentMethodText.style.color = "#005a9c";
+
+            summaryPaymentMethodText.style.fontWeight = "700";
+
+        } else {
+
+            if (promptpayContainer) promptpayContainer.style.display = "none";
+
+            if (payAtShopNote) payAtShopNote.style.display = "flex";
+
+            summaryPaymentMethodText.textContent = "ชำระเงินหน้าร้าน";
+
+            summaryPaymentMethodText.style.color = "#2b8a3e";
+
+            summaryPaymentMethodText.style.fontWeight = "700";
+
+        }
+
+    }
+
+
+
+    if (payMethodShop && payMethodQR) {
+
+        payMethodShop.addEventListener("change", updatePaymentMethodView);
+
+        payMethodQR.addEventListener("change", updatePaymentMethodView);
+
+    }
+
+
+
+    if (paymentSlipInput && slipPreviewContainer && slipPreviewImg) {
+
+        paymentSlipInput.addEventListener("change", function() {
+
+            const file = this.files[0];
+
+            if (file) {
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    slipPreviewImg.src = e.target.result;
+
+                    slipPreviewContainer.style.display = "block";
+
+                };
+
+                reader.readAsDataURL(file);
+
+            } else {
+
+                slipPreviewContainer.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+
+    function updatePriceBreakdown() {
+
+        const basePrice = parseInt(packageBasePriceInput.value, 10) || 0;
+
+        let selectedDelivery = "none";
+
+
+
+        deliveryRadios.forEach(function(r) {
+
+            if (r.checked) {
+
+                selectedDelivery = r.value;
+
+            }
+
+        });
+
+
+
+        // คำนวณระยะทางปัจจุบัน
+
+        const currentLat = parseFloat(latInput ? latInput.value : NaN);
+
+        const currentLng = parseFloat(lngInput ? lngInput.value : NaN);
+
+        let distKm = 0.0;
+
+        if (!isNaN(currentLat) && !isNaN(currentLng)) {
+
+            distKm = calculateDistanceKm(SHOP_LAT, SHOP_LNG, currentLat, currentLng);
+
+        }
+
+        if (distanceInput) distanceInput.value = distKm;
+
+        if (distanceText) distanceText.textContent = distKm.toFixed(1);
+
+
+
+        // อัปเดตราคาในการ์ดตัวเลือกแต่ละอันตามระยะทาง
+
+        const feeRoundTrip = getDeliveryFee('round_trip', distKm);
+
+        const feePickup = getDeliveryFee('pickup_only', distKm);
+
+        const feeDropoff = getDeliveryFee('dropoff_only', distKm);
+
+
+
+        const lblRT = document.getElementById("labelFeeRoundTrip");
+
+        const lblPU = document.getElementById("labelFeePickup");
+
+        const lblDO = document.getElementById("labelFeeDropoff");
+
+
+
+        if (lblRT) lblRT.textContent = distKm > 0 ? `+${feeRoundTrip} บาท (${distKm} กม.)` : "+70 บาท (เริ่มต้น)";
+
+        if (lblPU) lblPU.textContent = distKm > 0 ? `+${feePickup} บาท (${distKm} กม.)` : "+40 บาท (เริ่มต้น)";
+
+        if (lblDO) lblDO.textContent = distKm > 0 ? `+${feeDropoff} บาท (${distKm} กม.)` : "+40 บาท (เริ่มต้น)";
+
+
+
+        const deliveryFee = getDeliveryFee(selectedDelivery, distKm);
+
+        if (calculatedFeeText) calculatedFeeText.textContent = deliveryFee.toLocaleString("th-TH");
+
+
+
+        // ควบคุมการแสดงกล่องปักหมุดแผนที่
+
+        if (deliveryLocationContainer) {
+
+            if (selectedDelivery !== "none") {
+
+                deliveryLocationContainer.style.display = "block";
+
+                if (pickupAddressInput) pickupAddressInput.required = true;
+
+                const rowDist = document.getElementById("rowSummaryDistance");
+
+                if (rowDist) rowDist.style.display = "flex";
+
+                const sumDist = document.getElementById("summaryDistanceText");
+
+                if (sumDist) sumDist.textContent = distKm + " กม.";
+
+                if (pickupMap) {
+
+                    setTimeout(function() {
+
+                        pickupMap.invalidateSize();
+
+                    }, 200);
+
+                }
+
+            } else {
+
+                deliveryLocationContainer.style.display = "none";
+
+                if (pickupAddressInput) pickupAddressInput.required = false;
+
+                const rowDist = document.getElementById("rowSummaryDistance");
+
+                if (rowDist) rowDist.style.display = "none";
+
+            }
+
+        }
+
+
+
+        // อัปเดตตารางสรุปราคา
+
+        const selNameEl = document.getElementById("selectedName");
+
+        const pkgName = (selNameEl && selNameEl.textContent) ? selNameEl.textContent : "ยังไม่ได้เลือก";
+
+        const sumName = document.getElementById("summaryServiceName");
+
+        if (sumName) sumName.textContent = pkgName;
+
+
+
+        const sumPrice = document.getElementById("summaryServicePrice");
+
+        if (sumPrice) sumPrice.textContent = Number(basePrice).toLocaleString("th-TH") + " บาท";
+
+
+
+        const sumDelType = document.getElementById("summaryDeliveryType");
+
+        if (sumDelType) sumDelType.textContent = deliveryTypeNames[selectedDelivery] || selectedDelivery;
+
+
+
+        const sumDelFee = document.getElementById("summaryDeliveryFee");
+
+        if (sumDelFee) sumDelFee.textContent = (deliveryFee > 0 ? "+" : "") + Number(deliveryFee).toLocaleString("th-TH") + " บาท";
+
+
+
+        const totalPrice = basePrice + deliveryFee;
+
+        const sumTotal = document.getElementById("summaryTotalPrice");
+
+        if (sumTotal) sumTotal.textContent = Number(totalPrice).toLocaleString("th-TH");
+
+
+
+        updatePromptPayQR(totalPrice);
+
+
+
+        // =========================================================================
+
+        // ตรวจสอบเงื่อนไขล็อกช่องทางชำระเงิน:
+
+        // หากเลือกรับและส่ง (round_trip) ต้องสแกน QR Code เท่านั้น
+
+        // หากรับเอง (none) หรือเที่ยวเดียว (pickup_only, dropoff_only) สามารถเลือกได้ทั้ง 2 อย่าง
+
+        // =========================================================================
+
+        const roundTripLockBadge = document.getElementById("roundTripLockBadge");
+
+        const shopLockedTag = document.getElementById("shopLockedTag");
+
+        const shopBadgeTag = document.getElementById("shopBadgeTag");
+
+        const labelPayMethodShop = document.getElementById("labelPayMethodShop");
+
+        const shopOptionBox = document.getElementById("shopOptionBox");
+
+
+
+        if (selectedDelivery === "round_trip") {
+
+            payMethodShop.disabled = true;
+
+            payMethodShop.checked = false;
+
+            payMethodQR.checked = true;
+
+            if (roundTripLockBadge) roundTripLockBadge.style.display = "flex";
+
+            if (shopLockedTag) shopLockedTag.style.display = "inline-block";
+
+            if (shopBadgeTag) shopBadgeTag.style.display = "none";
+
+            if (shopOptionBox) {
+
+                shopOptionBox.style.opacity = "0.5";
+
+                shopOptionBox.style.cursor = "not-allowed";
+
+                shopOptionBox.style.background = "#fbfbfa";
+
+            }
+
+            if (labelPayMethodShop) {
+
+                labelPayMethodShop.title = "บริการรับ-ส่งไปและกลับ ต้องชำระเงินล่วงหน้าผ่านการสแกน QR Code เท่านั้นค่ะ";
+
+            }
+
+        } else {
+
+            payMethodShop.disabled = false;
+
+            if (roundTripLockBadge) roundTripLockBadge.style.display = "none";
+
+            if (shopLockedTag) shopLockedTag.style.display = "none";
+
+            if (shopBadgeTag) shopBadgeTag.style.display = "inline-block";
+
+            if (shopOptionBox) {
+
+                shopOptionBox.style.opacity = "1";
+
+                shopOptionBox.style.cursor = "pointer";
+
+                shopOptionBox.style.background = "#ffffff";
+
+            }
+
+            if (labelPayMethodShop) {
+
+                labelPayMethodShop.title = "";
+
+            }
+
+        }
+
+
+
+        updatePaymentMethodView();
+
+    }
+
+
+
+    const labelPayMethodShop = document.getElementById("labelPayMethodShop");
+
+    if (labelPayMethodShop) {
+
+        labelPayMethodShop.addEventListener("click", function(e) {
+
+            let curDelivery = "none";
+
+            deliveryRadios.forEach(function(r) {
+
+                if (r.checked) curDelivery = r.value;
+
+            });
+
+            if (curDelivery === "round_trip") {
+
+                e.preventDefault();
+
+                alert("สำหรับบริการรับ-ส่งน้องแมว (ไปและกลับ) ทางร้านต้องรบกวนให้ชำระเงินล่วงหน้าผ่านการสแกน QR Code เท่านั้น เพื่อยืนยันคิวรถรับ-ส่งนะคะ 🚗🐾");
+
+            }
+
+        });
+
+    }
+
+
+
+    deliveryRadios.forEach(function(r) {
+
+        r.addEventListener("change", updatePriceBreakdown);
+
+    });
+
+
+
+    // =========================================================================
+
+    // 5. ระบบแผนที่ปักหมุดสถานที่รับ-ส่ง (Leaflet Map, GPS Pinning & Place Search)
+
+    // =========================================================================
+
+    let pickupMap = null;
+
+    let pickupMarker = null;
+
+    let storeMarker = null;
+
+    let distanceLine = null;
+
+    let currentGeocodeRequestId = 0;
+
+
+
+    const defaultCustomerLat = SHOP_LAT + 0.005;
+
+    const defaultCustomerLng = SHOP_LNG + 0.005;
+
+
+
+    function escapeHtml(str) {
+
+        if (!str) return '';
+
+        return String(str)
+
+            .replace(/&/g, '&amp;')
+
+            .replace(/</g, '&lt;')
+
+            .replace(/>/g, '&gt;')
+
+            .replace(/"/g, '&quot;')
+
+            .replace(/'/g, '&#39;');
+
+    }
+
+
+
+    function setCoordinates(lat, lng, explicitAddress = null) {
+
+        if (latInput) latInput.value = lat.toFixed(6);
+
+        if (lngInput) lngInput.value = lng.toFixed(6);
+
+        if (coordsText) coordsText.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+
+
+        if (distanceLine) {
+
+            distanceLine.setLatLngs([[SHOP_LAT, SHOP_LNG], [lat, lng]]);
+
+        }
+
+
+
+        updatePriceBreakdown();
+
+
+
+        const addressStatusEl = document.getElementById("addressStatusHint");
+
+
+
+        // หากมีที่อยู่ที่ระบุมาชัดเจน (เช่น จากการคลิกเลือกผลการค้นหา) ให้อัปเดตทันที
+
+        if (explicitAddress && pickupAddressInput) {
+
+            pickupAddressInput.value = explicitAddress;
+
+            if (addressStatusEl) {
+
+                addressStatusEl.innerHTML = "<span style='color: #2b8a3e; font-weight: 600;'>✓ อัปเดตที่อยู่ตามสถานที่ค้นหาแล้ว</span>";
+
+                setTimeout(() => { addressStatusEl.innerHTML = ""; }, 4000);
+
+            }
+
+            return;
+
+        }
+
+
+
+        // แสดงสถานะกำลังดึงที่อยู่ตามจุดปักหมุด
+
+        if (addressStatusEl) {
+
+            addressStatusEl.innerHTML = "<span style='color: #e85d87;'>⏳ กำลังดึงชื่อที่อยู่จากจุดปักหมุด...</span>";
+
+        }
+
+
+
+        const requestId = ++currentGeocodeRequestId;
+
+
+
+        // ดึงชื่อที่อยู่ภาษาไทยจาก OpenStreetMap Nominatim Reverse Geocoding
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=th`)
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                // ป้องกัน race condition ให้แสดงเฉพาะผลลัพธ์จากการคลิกครั้งล่าสุด
+
+                if (requestId !== currentGeocodeRequestId) return;
+
+
+
+                if (data && data.display_name && pickupAddressInput) {
+
+                    // อัปเดตที่อยู่ทันทีเมื่อมีการปักหมุดใหม่ทุกครั้ง ไม่ต้องรอเคลียร์ข้อความก่อน!
+
+                    pickupAddressInput.value = data.display_name;
+
+
+
+                    if (addressStatusEl) {
+
+                        addressStatusEl.innerHTML = "<span style='color: #2b8a3e; font-weight: 600;'>✓ อัปเดตที่อยู่ตามจุดปักหมุดเรียบร้อยแล้ว</span>";
+
+                        setTimeout(() => {
+
+                            if (requestId === currentGeocodeRequestId) {
+
+                                addressStatusEl.innerHTML = "";
+
+                            }
+
+                        }, 4000);
+
+                    }
+
+                }
+
+            })
+
+            .catch(() => {
+
+                if (requestId === currentGeocodeRequestId && addressStatusEl) {
+
+                    addressStatusEl.innerHTML = "<span style='color: #88727d;'>📍 ปักหมุดพิกัดเรียบร้อย (สามารถพิมพ์รายละเอียดที่อยู่เพิ่มเติมได้ค่ะ)</span>";
+
+                }
+
+            });
+
+    }
+
+
+
+    function initPickupMap() {
+
+        if (typeof L === 'undefined') {
+
+            console.warn("Leaflet library is not available.");
+
+            return;
+
+        }
+
+
+
+        const mapContainer = document.getElementById('pickupMap');
+
+        if (!mapContainer) return;
+
+
+
+        try {
+
+            pickupMap = L.map('pickupMap').setView([SHOP_LAT, SHOP_LNG], 14);
+
+
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+                maxZoom: 19,
+
+                attribution: '© OpenStreetMap contributors'
+
+            }).addTo(pickupMap);
+
+
+
+            const storeIcon = L.divIcon({
+
+                className: 'custom-store-pin',
+
+                html: '<div style="background: #e85d87; color: white; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; border: 2.5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🏪</div>',
+
+                iconSize: [34, 34],
+
+                iconAnchor: [17, 17]
+
+            });
+
+
+
+            storeMarker = L.marker([SHOP_LAT, SHOP_LNG], { icon: storeIcon }).addTo(pickupMap);
+
+            storeMarker.bindPopup("<b>🏪 ร้าน Cat Spa & Grooming</b><br>สาขาใกล้คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น<br><em>จุดเริ่มต้นคำนวณระยะทาง</em>").openPopup();
+
+
+
+            pickupMarker = L.marker([defaultCustomerLat, defaultCustomerLng], {
+
+                draggable: true
+
+            }).addTo(pickupMap);
+
+
+
+            pickupMarker.bindPopup("<b>📍 จุดรับ-ส่งบ้านของคุณ</b><br>คลิกบนแผนที่ ลากหมุด หรือพิมพ์ค้นหาสถานที่").openPopup();
+
+
+
+            distanceLine = L.polyline([[SHOP_LAT, SHOP_LNG], [defaultCustomerLat, defaultCustomerLng]], {
+
+                color: '#e85d87',
+
+                weight: 3,
+
+                dashArray: '6, 8',
+
+                opacity: 0.8
+
+            }).addTo(pickupMap);
+
+
+
+            // โหลดพิกัดเริ่มต้น
+
+            setCoordinates(defaultCustomerLat, defaultCustomerLng);
+
+
+
+            // เมื่อลากหมุดเสร็จ ให้เปลี่ยนที่อยู่และคำนวณระยะทางใหม่ทันที
+
+            pickupMarker.on('dragend', function(e) {
+
+                const pos = e.target.getLatLng();
+
+                setCoordinates(pos.lat, pos.lng);
+
+            });
+
+
+
+            // เมื่อคลิกที่ใดๆ บนแผนที่ ให้ย้ายหมุดและเปลี่ยนที่อยู่ใหม่ทันที
+
+            pickupMap.on('click', function(e) {
+
+                pickupMarker.setLatLng(e.latlng);
+
+                setCoordinates(e.latlng.lat, e.latlng.lng);
+
+            });
+
+        } catch (mapErr) {
+
+            console.error("Map initialization failed:", mapErr);
+
+        }
+
+    }
+
+
+
+    // ฟังก์ชันปักหมุดตามตำแหน่งปัจจุบันของผู้ใช้ (GPS)
+
+    if (btnLocateMe) {
+
+        btnLocateMe.addEventListener("click", function() {
+
+            if (!navigator.geolocation) {
+
+                alert("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง GPS ค่ะ");
+
+                return;
+
+            }
+
+
+
+            const btn = this;
+
+            const originalHtml = btn.innerHTML;
+
+            btn.innerHTML = "<span>⏳</span> กำลังระบุตำแหน่งของคุณ...";
+
+            btn.disabled = true;
+
+
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(position) {
+
+                    const lat = position.coords.latitude;
+
+                    const lng = position.coords.longitude;
+
+
+
+                    if (pickupMap && pickupMarker) {
+
+                        pickupMap.setView([lat, lng], 16);
+
+                        pickupMarker.setLatLng([lat, lng]);
+
+                        pickupMarker.bindPopup("<b>📍 ตำแหน่งปัจจุบันของคุณ (GPS)</b><br>อัปเดตที่อยู่และคำนวณระยะทางเรียบร้อยแล้วค่ะ").openPopup();
+
+                    }
+
+
+
+                    // อัปเดตพิกัด และดึงที่อยู่ใหม่ใส่ใน textarea ทันที!
+
+                    setCoordinates(lat, lng);
+
+
+
+                    btn.innerHTML = originalHtml;
+
+                    btn.disabled = false;
+
+                },
+
+                function(error) {
+
+                    let errMsg = "ไม่สามารถเข้าถึงตำแหน่งของคุณได้ กรุณาค้นหาสถานที่หรือคลิกเลือกจุดบนแผนที่ได้เลยค่ะ";
+
+                    if (error && error.code === 1) {
+
+                        errMsg = "กรุณากด 'อนุญาต' (Allow) ให้เบราว์เซอร์เข้าถึงตำแหน่ง GPS ของคุณ เพื่อปักหมุดตำแหน่งปัจจุบันค่ะ หรือสามารถคลิกเลือกจุดบนแผนที่ได้เลยนะคะ";
+
+                    } else if (error && error.code === 3) {
+
+                        errMsg = "การดึงพิกัด GPS หมดเวลา กรุณาลองใหม่อีกครั้ง หรือคลิกเลือกจุดบนแผนที่ได้เลยค่ะ";
+
+                    }
+
+                    alert(errMsg);
+
+                    btn.innerHTML = originalHtml;
+
+                    btn.disabled = false;
+
+                },
+
+                { timeout: 12000, enableHighAccuracy: true, maximumAge: 0 }
+
+            );
+
+        });
+
+    }
+
+
+
+    // =========================================================================
+
+    // ระบบค้นหาสถานที่บนแผนที่ (Place Search)
+
+    // =========================================================================
+
+    const btnSearchPlace = document.getElementById("btnSearchPlace");
+
+    const mapSearchInput = document.getElementById("mapSearchInput");
+
+    const btnClearSearch = document.getElementById("btnClearSearch");
+
+    const mapSearchResults = document.getElementById("mapSearchResults");
+
+
+
+    if (btnSearchPlace && mapSearchInput) {
+
+        btnSearchPlace.addEventListener("click", function() {
+
+            performLocationSearch(mapSearchInput.value);
+
+        });
+
+
+
+        mapSearchInput.addEventListener("keydown", function(e) {
+
+            if (e.key === "Enter") {
+
+                e.preventDefault();
+
+                performLocationSearch(this.value);
+
+            }
+
+        });
+
+
+
+        mapSearchInput.addEventListener("input", function() {
+
+            if (btnClearSearch) {
+
+                btnClearSearch.style.display = this.value ? "block" : "none";
+
+            }
+
+        });
+
+    }
+
+
+
+    if (btnClearSearch && mapSearchInput) {
+
+        btnClearSearch.addEventListener("click", function() {
+
+            mapSearchInput.value = "";
+
+            this.style.display = "none";
+
+            if (mapSearchResults) mapSearchResults.style.display = "none";
+
+            mapSearchInput.focus();
+
+        });
+
+    }
+
+
+
+    // ปิดกล่องผลการค้นหาเมื่อคลิกนอกพื้นที่
+
+    document.addEventListener("click", function(e) {
+
+        const searchWrap = document.querySelector(".map-search-wrap");
+
+        if (mapSearchResults && searchWrap && !searchWrap.contains(e.target)) {
+
+            mapSearchResults.style.display = "none";
+
+        }
+
+    });
+
+
+
+    function performLocationSearch(query) {
+
+        if (!query || !query.trim()) {
+
+            alert("กรุณากรอกชื่อสถานที่ เช่น ชื่อมหาวิทยาลัย, อาคาร, หอพัก, ถนน หรือตำบลค่ะ");
+
+            if (mapSearchInput) mapSearchInput.focus();
+
+            return;
+
+        }
+
+
+
+        if (!mapSearchResults) return;
+
+        mapSearchResults.style.display = "block";
+
+        mapSearchResults.innerHTML = '<div style="padding: 14px; text-align: center; color: #8c7870; font-size: 13.5px;">⏳ กำลังค้นหาสถานที่...</div>';
+
+
+
+        const q = encodeURIComponent(query.trim());
+
+        // ค้นหาผ่าน OpenStreetMap Nominatim API ภาษาไทย
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&countrycodes=th&accept-language=th&limit=6`)
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                if (!data || data.length === 0) {
+
+                    mapSearchResults.innerHTML = '<div style="padding: 14px; text-align: center; color: #8c7870; font-size: 13.5px;">❌ ไม่พบสถานที่ที่ค้นหา กรุณาลองใช้คำค้นอื่น หรือคลิกปักหมุดบนแผนที่ได้เลยค่ะ</div>';
+
+                    return;
+
+                }
+
+
+
+                let html = '';
+
+                data.forEach((item) => {
+
+                    const lat = parseFloat(item.lat);
+
+                    const lon = parseFloat(item.lon);
+
+                    const title = item.name || item.display_name.split(',')[0];
+
+                    const fullAddr = item.display_name;
+
+                    const safeAddr = encodeURIComponent(fullAddr);
+
+
+
+                    html += `
+
+                        <div class="search-result-item" onclick="applySearchResult(${lat}, ${lon}, '${safeAddr}')">
+
+                            <span style="font-size: 18px; margin-top: 2px;">📍</span>
+
+                            <div style="flex: 1;">
+
+                                <div class="search-result-title">${escapeHtml(title)}</div>
+
+                                <div class="search-result-sub">${escapeHtml(fullAddr)}</div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                });
+
+                mapSearchResults.innerHTML = html;
+
+            })
+
+            .catch(err => {
+
+                mapSearchResults.innerHTML = '<div style="padding: 14px; text-align: center; color: #e54343; font-size: 13.5px;">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง หรือคลิกบนแผนที่ได้เลยค่ะ</div>';
+
+            });
+
+    }
+
+
+
+    window.applySearchResult = function(lat, lon, safeEncodedAddr) {
+
+        const fullAddr = decodeURIComponent(safeEncodedAddr);
+
+        if (pickupMap && pickupMarker) {
+
+            pickupMap.setView([lat, lon], 16);
+
+            pickupMarker.setLatLng([lat, lon]);
+
+            pickupMarker.bindPopup(`<b>📍 ${escapeHtml(fullAddr.split(',')[0])}</b><br>อัปเดตที่อยู่และคำนวณระยะทางเรียบร้อยแล้ว`).openPopup();
+
+        }
+
+
+
+        // อัปเดตพิกัด และใส่ที่อยู่ที่ได้ทันทีลงใน textarea
+
+        setCoordinates(lat, lon, fullAddr);
+
+
+
+        if (mapSearchResults) mapSearchResults.style.display = "none";
+
+        if (mapSearchInput) mapSearchInput.value = fullAddr.split(',')[0];
+
+    };
+
+
+
+    // เรียกใช้แผนที่อย่างปลอดภัย
+
+    initPickupMap();
+
+
+
+    // =========================================================================
+
+    // 6. ตรวจสอบก่อนส่งฟอร์ม (Form Validation)
+
+    // =========================================================================
+
+    const bookingForm = document.getElementById("bookingForm");
+
+    if (bookingForm) {
+
+        bookingForm.addEventListener("submit", function(event) {
+
+            if (!packageInput || !packageInput.value) {
+
+                event.preventDefault();
+
+                alert("กรุณาเลือกแพ็กเกจบริการก่อนส่งคำขอจองคิวค่ะ");
+
+                return;
+
+            }
+
+
+
+            let selectedDelivery = "none";
+
+            deliveryRadios.forEach(function(r) {
+
+                if (r.checked) selectedDelivery = r.value;
+
+            });
+
+
+
+            if (selectedDelivery !== "none") {
+
+                if (pickupAddressInput && !pickupAddressInput.value.trim()) {
+
+                    event.preventDefault();
+
+                    alert("กรุณาระบุที่อยู่สำหรับให้รถไปรับ-ส่งน้องแมวด้วยนะคะ");
+
+                    pickupAddressInput.focus();
+
+                    return;
+
+                }
+
+            }
+
+
+
+            if (selectedDelivery === "round_trip" && payMethodShop && payMethodShop.checked) {
+
+                event.preventDefault();
+
+                alert("สำหรับบริการรับ-ส่งน้องแมว (ไปและกลับ) ต้องชำระเงินผ่านการสแกน QR Code เท่านั้นค่ะ");
+
+                payMethodQR.checked = true;
+
+                updatePaymentMethodView();
+
+                return;
+
+            }
+
+        });
+
+    }
+
+
+
+    // เริ่มต้นคำนวณราคาและตั้งค่าเริ่มต้น
+
+    updatePriceBreakdown();
+
+    updatePaymentMethodView();
+
+
+
+    // จัดการเปิด-ปิด Dropdown โหมดแจ้งเตือน
+
+    const notifBellBtn = document.getElementById("notifBellBtn");
+
+    const notifDropdown = document.getElementById("notifDropdown");
+
+    if (notifBellBtn && notifDropdown) {
+
+        notifBellBtn.addEventListener("click", function(e) {
+
+            e.preventDefault();
+
+            e.stopPropagation();
+
+            notifDropdown.classList.toggle("show");
+
+        });
+
+        document.addEventListener("click", function(e) {
+
+            if (!notifDropdown.contains(e.target) && !notifBellBtn.contains(e.target)) {
+
+                notifDropdown.classList.remove("show");
+
+            }
+
+        });
+
+    }
+
+
+
+    // =========================================================================
+
+    // ฟังก์ชันจัดการเลือกพนักงาน และอัปเดตช่องสรุปยอด
+
+    // =========================================================================
+
+    function updateSelectedStaffSummary() {
+
+        const staffRadios = document.querySelectorAll('input[name="staff_id"]');
+
+        const summaryStaff = document.getElementById("summaryStaffName");
+
+        if (!summaryStaff) return;
+
+
+
+        let staffName = "ให้ร้านจัดสรรให้อัตโนมัติ";
+
+        staffRadios.forEach(function(r) {
+
+            if (r.checked) {
+
+                staffName = r.getAttribute("data-name") || "ให้ร้านจัดสรรให้อัตโนมัติ";
+
+            }
+
+        });
+
+        summaryStaff.innerText = staffName;
+
+    }
+
+
+
+    // เรียกใช้เมื่อโหลดหน้าเว็บเพื่อเช็คตัวเลือกเริ่มต้น
+
+    updateSelectedStaffSummary();
+
+
+
+    // =========================================================================
+
+    // ฟังก์ชันเปิด-ปิด Modal รีวิวพนักงาน (AJAX API)
+
+    // =========================================================================
+
+    function openStaffReviewsModal(staffId, staffName) {
+
+        const modal = document.getElementById("staffReviewsModal");
+
+        const title = document.getElementById("staffModalTitle");
+
+        const body = document.getElementById("staffModalBody");
+
+        if (!modal || !body) return;
+
+
+
+        title.innerHTML = `<span>💬</span> รีวิวของคุณ${staffName}`;
+
+        body.innerHTML = `<div style="text-align: center; color: #88727d; padding: 20px;">กำลังโหลดข้อมูลรีวิว...</div>`;
+
+        modal.style.display = "flex";
+
+
+
+        fetch(`/api/staff/${staffId}/reviews`)
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                if (data.error) {
+
+                    body.innerHTML = `<div style="color: #e11d48; text-align: center;">${data.error}</div>`;
+
+                    return;
+
+                }
+
+
+
+                const staff = data.staff;
+
+                const reviews = data.reviews || [];
+
+
+
+                let html = `
+
+                    <div style="display: flex; align-items: center; gap: 12px; background: #fff0f5; padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+
+                        <img src="/static/images/${staff.image}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #ed5682;">
+
+                        <div>
+
+                            <strong style="color: #2b1820; font-size: 15px;">คุณ${staff.nickname}</strong>
+
+                            <div style="font-size: 12px; color: #ed5682; font-weight: 600;">${staff.role_title}</div>
+
+                            <div style="font-size: 12px; color: #eab308; font-weight: 700; margin-top: 2px;">⭐ ${Number(staff.rating || 5.0).toFixed(1)} / 5.0 (รีวิวจากลูกค้า ${reviews.length} รายการ)</div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">ความคิดเห็นจากลูกค้าที่เคยรับบริการ:</div>
+
+                `;
+
+
+
+                if (reviews.length === 0) {
+
+                    html += `<div style="text-align: center; color: #94a3b8; padding: 20px; font-size: 13px;">ยังไม่มีรีวิวข้อความสำหรับพนักงานคนนี้</div>`;
+
+                } else {
+
+                    reviews.forEach(rv => {
+
+                        const stars = "★".repeat(rv.staff_rating || 5);
+
+                        html += `
+
+                            <div style="background: #fafafa; border: 1px solid #f0e6eb; border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+
+                                    <strong style="font-size: 13px; color: #332228;">คุณ${escapeHtml(rv.user_name)} (น้อง${escapeHtml(rv.cat_name)})</strong>
+
+                                    <span style="color: #f59e0b; font-size: 12px;">${stars}</span>
+
+                                </div>
+
+                                <p style="margin: 0; font-size: 12.5px; color: #55444b; line-height: 1.4;">"${escapeHtml(rv.staff_comment)}"</p>
+
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">${rv.created_at || ''}</div>
+
+                            </div>
+
+                        `;
+
+                    });
+
+                }
+
+
+
+                body.innerHTML = html;
+
+            })
+
+            .catch(err => {
+
+                body.innerHTML = `<div style="color: #e11d48; text-align: center;">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+
+            });
+
+    }
+
+
+
+    function closeStaffReviewsModal() {
+
+        const modal = document.getElementById("staffReviewsModal");
+
+        if (modal) modal.style.display = "none";
+
+    }
+
+
+
+    window.addEventListener("click", function(event) {
+
+        const modal = document.getElementById("staffReviewsModal");
+
+        if (event.target === modal) {
+
+            closeStaffReviewsModal();
+
+        }
+
+    });
+
+
+
+</script>
+
+
+
+<!-- =========================================================================
+
+     MODAL แสดงรีวิวพนักงาน (STAFF REVIEWS MODAL)
+
+     ========================================================================= -->
+
+<div class="modal" id="staffReviewsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+
+    <div class="modal-content" style="background: white; border-radius: 20px; width: 92%; max-width: 520px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
+
+        <div class="modal-header" style="padding: 16px 20px; background: linear-gradient(135deg, #fce4ec, #fff0f5); border-bottom: 1px solid #f2dce5; display: flex; align-items: center; justify-content: space-between;">
+
+            <h3 id="staffModalTitle" style="margin: 0; font-size: 17px; color: #2b1820; display: flex; align-items: center; gap: 8px;">
+
+                <span>💬</span> รีวิวจากลูกค้า
+
+            </h3>
+
+            <button type="button" class="close-btn" onclick="closeStaffReviewsModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #7f6e76;">✕</button>
+
+        </div>
+
+        <div id="staffModalBody" style="padding: 20px; overflow-y: auto; flex: 1;">
+
+            <div style="text-align: center; color: #88727d; padding: 20px;">กำลังโหลดรีวิว...</div>
+
+        </div>
+
+        <div style="padding: 12px 20px; border-top: 1px solid #f2dce5; background: #fafafa; text-align: right;">
+
+            <button type="button" onclick="closeStaffReviewsModal()" style="background: #ed5682; color: white; border: none; padding: 8px 18px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+
+                ปิดหน้าต่าง
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+</body>
+
+</html>

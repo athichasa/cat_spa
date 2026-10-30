@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทีมผู้เชี่ยวชาญดูแลน้องแมว | Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --pink-primary: #ed5682;
+            --pink-hover: #db416f;
+            --pink-light: #fff0f5;
+            --pink-soft: #fce7f0;
+            --text-dark: #332228;
+            --text-muted: #755f68;
+            --border-soft: #f2dce5;
+            --card-shadow: 0 10px 30px rgba(237, 86, 130, 0.08);
+            --card-hover-shadow: 0 18px 40px rgba(237, 86, 130, 0.16);
+        }
+
+        body {
+            font-family: 'Kanit', Arial, sans-serif;
+            background: linear-gradient(180deg, #fff5f8 0%, #fffbfd 100%);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Top Navigation Bar */
+        .staff-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1.5px solid var(--border-soft);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .staff-nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--pink-primary);
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .staff-nav-brand img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .staff-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-link-btn {
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .nav-link-outline {
+            color: var(--pink-primary);
+            border: 1.5px solid var(--border-soft);
+            background: white;
+        }
+
+        .nav-link-outline:hover {
+            border-color: var(--pink-primary);
+            background: var(--pink-light);
+        }
+
+        .nav-link-primary {
+            background: linear-gradient(135deg, var(--pink-primary), #f07297);
+            color: white;
+            box-shadow: 0 4px 14px rgba(237, 86, 130, 0.3);
+        }
+
+        .nav-link-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(237, 86, 130, 0.4);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 30px 20px 80px;
+        }
+
+        /* Hero Banner */
+        .page-header {
+            text-align: center;
+            max-width: 780px;
+            margin: 10px auto 40px;
+        }
+
+        .header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffe3ec;
+            color: var(--pink-primary);
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 13.5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+
+        .page-header h1 {
+            font-size: 34px;
+            font-weight: 800;
+            color: #2b1820;
+            margin: 0 0 12px;
+            line-height: 1.3;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Staff Grid */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+            gap: 28px;
+            margin-bottom: 60px;
+        }
+
+        /* Staff Card */
+        .staff-card {
+            background: white;
+            border-radius: 24px;
+            border: 1.5px solid var(--border-soft);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: #f7a8c0;
+        }
+
+        /* Staff Card Header & Image */
+        .staff-card-header {
+            position: relative;
+            background: linear-gradient(135deg, #ffdce7 0%, #ffeaf1 100%);
+            padding: 24px 20px 16px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .staff-card-header::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: white;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .staff-photo-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto;
+            z-index: 2;
+        }
+
+        .staff-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 8px 24px rgba(237, 86, 130, 0.25);
+            background: #fff;
+            transition: transform 0.3s ease;
+        }
+
+        .staff-card:hover .staff-photo {
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #10b981;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 2px solid white;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        /* Staff Body Content */
+        .staff-body {
+            padding: 10px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            z-index: 2;
+        }
+
+        .staff-nickname-title {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .staff-nickname {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2b1820;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .staff-role {
+            font-size: 13.5px;
+            color: var(--pink-primary);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Metric Chips (Rating, Exp, Services) */
+        .metric-chips {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            background: #fff7fa;
+            border: 1px solid #fce3ec;
+            border-radius: 16px;
+            padding: 10px 8px;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .metric-item .val {
+            font-size: 16px;
+            font-weight: 800;
+            color: #332228;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .metric-item .val.star {
+            color: #eab308;
+        }
+
+        .metric-item .lbl {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 1px;
+        }
+
+        /* Section Block in Card */
+        .staff-block {
+            margin-bottom: 16px;
+        }
+
+        .block-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #4a363f;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Specialties Pills */
+        .specialty-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .specialty-pill {
+            background: #fff0f5;
+            color: #be185d;
+            border: 1px solid #fbcfe8;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Work Schedule Box */
+        .schedule-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Highlight Quote Box */
+        .highlight-quote-box {
+            background: #fdf2f8;
+            border-left: 3.5px solid var(--pink-primary);
+            border-radius: 0 12px 12px 0;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+        }
+
+        .highlight-quote-box p {
+            margin: 0;
+            font-size: 13px;
+            color: #831843;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* Mini Customer Review Carousel/List */
+        .staff-reviews-wrap {
+            margin-bottom: 18px;
+            flex: 1;
+        }
+
+        .review-bubble {
+            background: #fafafa;
+            border: 1px solid #f0e6eb;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+
+        .review-bubble-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .review-author {
+            font-weight: 700;
+            color: #332228;
+        }
+
+        .review-stars {
+            color: #f59e0b;
+            font-size: 12px;
+        }
+
+        .review-text {
+            font-size: 12.5px;
+            color: #55444b;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Card Action Button */
+        .book-with-staff-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--pink-primary) 0%, #f07297 100%);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(237, 86, 130, 0.28);
+            transition: all 0.25s ease;
+            margin-top: auto;
+        }
+
+        .book-with-staff-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(237, 86, 130, 0.4);
+            color: white;
+        }
+
+        /* Shop Reviews Showcase at Bottom */
+        .shop-reviews-section {
+            background: white;
+            border-radius: 28px;
+            border: 1.5px solid var(--border-soft);
+            padding: 40px 30px;
+            box-shadow: var(--card-shadow);
+            margin-top: 40px;
+        }
+
+        .section-header-centered {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-header-centered h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #2b1820;
+            margin: 0 0 8px;
+        }
+
+        .reviews-masonry {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 18px;
+        }
+
+        .feedback-card {
+            background: #fff8fa;
+            border: 1px solid #fce3ec;
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .feedback-card:hover {
+            border-color: #f7a8c0;
+            background: white;
+            box-shadow: 0 4px 16px rgba(237, 86, 130, 0.1);
+        }
+
+        .feedback-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .feedback-user {
+            font-weight: 700;
+            font-size: 14px;
+            color: #332228;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feedback-date {
+            font-size: 11.5px;
+            color: #9c8891;
+        }
+
+        .feedback-body {
+            font-size: 13.5px;
+            color: #4a363f;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .feedback-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--pink-primary);
+            font-weight: 600;
+            border-top: 1px dashed #f2dce5;
+            padding-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .staff-grid {
+                grid-template-columns: 1fr;
+            }
+            .staff-nav {
+                padding: 12px 16px;
+            }
+            .page-header h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="staff-nav">
+        <a href="{{ url_for('dashboard') if 'user_id' in session else url_for('home') }}" class="staff-nav-brand">
+            <img src="{{ url_for('static', filename='images/cat-spa-logo.png') }}" alt="Logo" onerror="this.style.display='none';">
+            <span>Cat Spa <small style="font-size: 13px; font-weight: 500; color: #88727d;">& Grooming</small></span>
+        </a>
+
+        <div class="staff-nav-links">
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn nav-link-outline">หน้าหลัก</a>
+                <a href="{{ url_for('bookings') }}" class="nav-link-btn nav-link-outline">การจองของฉัน</a>
+                <a href="{{ url_for('new_booking') }}" class="nav-link-btn nav-link-primary">🐾 จองคิวสปา</a>
+            {% else %}
+                <a href="{{ url_for('home') }}" class="nav-link-btn nav-link-outline">หน้าแรก</a>
+                <a href="{{ url_for('login') }}" class="nav-link-btn nav-link-outline">เข้าสู่ระบบ</a>
+                <a href="{{ url_for('register') }}" class="nav-link-btn nav-link-primary">สมัครสมาชิก</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <div class="header-pill">
+                <span>🌸</span> PROFESSIONAL FELINE CARE TEAM
+            </div>
+            <h1>ทีมผู้เชี่ยวชาญดูแลน้องแมว Cat Spa</h1>
+            <p>
+                ทีมงานของเราผ่านการอบรมจิตวิทยาและกายภาพแมวโดยเฉพาะ สัมผัสมือเบา อ่อนโยน เข้าใจภาษาทางกายของน้องแมวทุกสายพันธุ์ เพื่อให้ลูกรักของคุณผ่อนคลายและมีความสุขที่สุด ♡
+            </p>
+        </div>
+
+        <!-- STAFF SHOWCASE GRID -->
+        <div class="staff-grid">
+            {% for s in staff_list %}
+            <div class="staff-card" id="staff-{{ s.staff_id }}">
+                <div class="staff-card-header">
+                    <div class="staff-photo-wrapper">
+                        <img src="{{ url_for('static', filename='images/' + s.image) }}" alt="{{ s.name }}" class="staff-photo">
+                        <span class="status-badge">
+                            <span>●</span> {{ s.status_text or 'พร้อมให้บริการ' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="staff-body">
+                    <div class="staff-nickname-title">
+                        <h3 class="staff-nickname">
+                            คุณ{{ s.nickname }}
+                            
+                        </h3>
+                        <div class="staff-role">{{ s.role_title }}</div>
+                    </div>
+
+                    <!-- Metrics: Rating, Experience, Service Count -->
+                    <div class="metric-chips">
+                        <div class="metric-item">
+                            <div class="val star">⭐ {{ "%.1f"|format(s.rating or 5.0) }}</div>
+                            <div class="lbl">คะแนนรีวิว</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="val">🏆 {{ s.experience_years }} ปี</div>
+                            <div class="lbl">ประสบการณ์</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="val">🎯 {{ s.service_count or 0 }}+</div>
+                            <div class="lbl">ให้บริการแล้ว</div>
+                        </div>
+                    </div>
+
+                    <!-- ความเชี่ยวชาญ -->
+                    <div class="staff-block">
+                        <div class="block-title">
+                            <span>✨</span> ความเชี่ยวชาญพิเศษ
+                        </div>
+                        <div class="specialty-tags">
+                            {% for spec in s.specialty_list %}
+                                <span class="specialty-pill">{{ spec }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- จุดเด่นในการดูแลแมว -->
+                    <div class="staff-block">
+                        <div class="block-title">
+                            <span>💖</span> จุดเด่นการดูแลน้องแมว
+                        </div>
+                        <div class="highlight-quote-box">
+                            <p>“{{ s.highlights }}”</p>
+                        </div>
+                    </div>
+
+                    <!-- รีวิวหรือความคิดเห็นจากลูกค้า -->
+                    <div class="staff-reviews-wrap">
+                        <div class="block-title" style="justify-content: space-between;">
+                            <span style="display: flex; align-items: center; gap: 6px;">
+                                <span>💬</span> รีวิวจากลูกค้า ({{ s.review_count }} รีวิว)
+                            </span>
+                        </div>
+
+                        {% if s.reviews %}
+                            {% for rev in s.reviews[:2] %}
+                                <div class="review-bubble">
+                                    <div class="review-bubble-header">
+                                        <span class="review-author">{{ rev.masked_user_name or rev.user_name }} (น้อง{{ rev.cat_name }})</span>
+                                        <span class="review-stars">
+                                            {% for _ in range(rev.staff_rating or 5) %}★{% endfor %}
+                                        </span>
+                                    </div>
+                                    <p class="review-text">"{{ rev.staff_comment }}"</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="font-size: 12px; color: #9c8891; font-style: italic; text-align: center; padding: 10px;">
+                                ยังไม่มีรีวิวสำหรับพนักงานคนนี้ มาร่วมเป็นคนแรกที่รีวิวกันนะคะ ♡
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- ปุ่มจองคิวกับพนักงานคนนี้ -->
+                    <a href="{{ url_for('new_booking', staff_id=s.staff_id) }}" class="book-with-staff-btn">
+                        <span>🐾</span> จองคิวกับคุณ{{ s.nickname }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- CUSTOMER REVIEWS SHOWCASE -->
+        <div class="shop-reviews-section">
+            <div class="section-header-centered">
+                <span class="header-pill">⭐ CUSTOMER FEEDBACK & REVIEWS</span>
+                <h2>เสียงสะท้อนความประทับใจจากผู้ใช้บริการ</h2>
+                <p style="color: var(--text-muted); font-size: 15px; margin: 0;">
+                    ทุกคำติชมช่วยให้ทีมงาน Cat Spa & Grooming พัฒนาและดูแลลูกรักของท่านอย่างสมบูรณ์แบบ
+                </p>
+            </div>
+
+            {% if shop_reviews %}
+                <div class="reviews-masonry">
+                    {% for rev in shop_reviews %}
+                    <div class="feedback-card">
+                        <div>
+                            <div class="feedback-meta">
+                                <div class="feedback-user">
+                                    <span>🐱</span> {{ rev.masked_user_name or rev.user_name }}
+                                </div>
+                                <span style="color: #f59e0b; font-size: 13px;">
+                                    {% for _ in range(rev.shop_rating or 5) %}★{% endfor %}
+                                </span>
+                            </div>
+                            <p class="feedback-body">
+                                “{{ rev.shop_comment or rev.staff_comment }}”
+                            </p>
+                        </div>
+                        <div class="feedback-footer">
+                            <span>น้อง{{ rev.cat_name }} • {{ rev.service_name or 'Cat Spa' }}</span>
+                            {% if rev.staff_name %}
+                                <span style="background: #ffe3ec; padding: 2px 8px; border-radius: 8px; font-size: 11px;">ดูแลโดย คุณ{{ rev.staff_name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #9c8891; padding: 20px;">ยังไม่มีข้อมูลรีวิวในขณะนี้</p>
+            {% endif %}
+        </div>
+
+        <!-- Back Button -->
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{{ url_for('dashboard') if 'user_id' in session else url_for('home') }}" class="nav-link-btn nav-link-outline" style="display: inline-flex; align-items: center; gap: 8px;">
+                ← กลับหน้าหลัก
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

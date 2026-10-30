@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เขียนรีวิวบริการและพนักงาน | Cat Spa & Grooming</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --pink-primary: #ed5682;
+            --pink-hover: #db416f;
+            --pink-light: #fff0f5;
+            --border-soft: #f2dce5;
+            --text-dark: #332228;
+            --text-muted: #755f68;
+        }
+
+        body {
+            font-family: 'Kanit', Arial, sans-serif;
+            background: linear-gradient(180deg, #fff7fa 0%, #ffffff 100%);
+            color: var(--text-dark);
+            padding: 30px 15px;
+            margin: 0;
+        }
+
+        .review-container {
+            max-width: 680px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 24px;
+            border: 1.5px solid var(--border-soft);
+            box-shadow: 0 10px 35px rgba(237, 86, 130, 0.1);
+            overflow: hidden;
+        }
+
+        .review-header {
+            background: linear-gradient(135deg, #fce4ec 0%, #fff0f5 100%);
+            padding: 30px 24px 20px;
+            text-align: center;
+            border-bottom: 1.5px solid var(--border-soft);
+        }
+
+        .header-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+
+        .review-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #2b1820;
+            margin: 0 0 8px;
+        }
+
+        .review-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Booking Summary Card */
+        .booking-summary-strip {
+            background: #fff8fa;
+            border: 1px dashed #f689ad;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 20px 24px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .cat-info-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cat-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--pink-primary);
+        }
+
+        .booking-meta-text h4 {
+            margin: 0 0 2px;
+            font-size: 15px;
+            color: #332228;
+        }
+
+        .booking-meta-text p {
+            margin: 0;
+            font-size: 12.5px;
+            color: #7f6e76;
+        }
+
+        /* Form */
+        .review-form {
+            padding: 24px;
+        }
+
+        .review-section {
+            background: #ffffff;
+            border: 1.5px solid #f2e2e9;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 24px;
+            transition: border-color 0.2s ease;
+        }
+
+        .review-section:focus-within {
+            border-color: var(--pink-primary);
+            box-shadow: 0 4px 16px rgba(237, 86, 130, 0.08);
+        }
+
+        .section-legend {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2b1820;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .section-subdesc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Staff Profile Strip in Form */
+        .staff-target-strip {
+            background: #fff0f5;
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #fce7f0;
+        }
+
+        .staff-target-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(237, 86, 130, 0.2);
+        }
+
+        /* Star Rating Controls */
+        .star-rating-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 14px;
+            background: #fffcfd;
+            border-radius: 14px;
+            border: 1px solid #fdedf3;
+            margin-bottom: 16px;
+        }
+
+        .star-row {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .star-row input {
+            display: none;
+        }
+
+        .star-row label {
+            font-size: 36px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: color 0.15s ease, transform 0.15s ease;
+            user-select: none;
+        }
+
+        .star-row label:hover,
+        .star-row label:hover ~ label,
+        .star-row input:checked ~ label {
+            color: #f59e0b;
+            transform: scale(1.15);
+        }
+
+        .star-feedback-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #d97706;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
+        /* Textarea Inputs */
+        .review-textarea {
+            width: 100%;
+            border: 1.5px solid #e5d8de;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 13.5px;
+            color: #332228;
+            outline: none;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+        }
+
+        .review-textarea:focus {
+            border-color: var(--pink-primary);
+        }
+
+        /* Submit Button */
+        .submit-review-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--pink-primary) 0%, #f07297 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(237, 86, 130, 0.35);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(237, 86, 130, 0.45);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+            color: var(--pink-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="review-container">
+
+    <!-- Header -->
+    <div class="review-header">
+        <div class="header-icon">⭐</div>
+        <h1>แบ่งปันความประทับใจของคุณ</h1>
+        <p>
+            ขอบพระคุณที่ไว้วางใจให้ Cat Spa & Grooming ดูแลน้องแมวของคุณค่ะ ♡<br>
+            ทุกความคิดเห็นของท่านคือกำลังใจและข้อมูลสำคัญในการยกระดับการบริการ
+        </p>
+    </div>
+
+    <!-- Booking Summary Strip -->
+    <div class="booking-summary-strip">
+        <div class="cat-info-wrap">
+            {% if booking.cat_image %}
+                <img src="{{ url_for('uploaded_cat_image', filename=booking.cat_image) }}" alt="{{ booking.cat_name }}" class="cat-thumb" onerror="this.style.display='none';">
+            {% else %}
+                <div class="cat-thumb" style="display: grid; place-items: center; background: #ffe4e6; font-size: 24px;">🐱</div>
+            {% endif %}
+            <div class="booking-meta-text">
+                <h4>น้อง{{ booking.cat_name }} • {{ booking.service_name }}</h4>
+                <p>นัดหมาย: {{ booking.booking_date }} เวลา {{ booking.booking_time }} น. (คิว #{{ booking.booking_id }})</p>
+            </div>
+        </div>
+
+        {% if booking.staff_name %}
+            <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 4px 10px; border-radius: 10px; font-size: 12px; color: #be185d; font-weight: 700;">
+                👩‍💼 ผู้ดูแล: คุณ{{ booking.staff_name }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Review Form -->
+    <form method="POST" class="review-form">
+
+        <!-- 1. รีวิวร้าน Cat Spa & Grooming -->
+        <div class="review-section">
+            <div class="section-legend">
+                <span>🏪</span> 1. ความพึงพอใจต่อร้าน Cat Spa & Grooming
+            </div>
+            <div class="section-subdesc">
+                ประเมินความสะอาด บรรยากาศ ความตรงต่อเวลา และการบริการโดยรวมของร้าน
+            </div>
+
+            <div class="star-rating-box">
+                <div class="star-row">
+                    <input type="radio" id="shop-star5" name="shop_rating" value="5" required onclick="setFeedback('shopText', '💖 ประทับใจมากที่สุด! ยอดเยี่ยมทุกด้าน')">
+                    <label for="shop-star5" title="5 ดาว">★</label>
+                    <input type="radio" id="shop-star4" name="shop_rating" value="4" onclick="setFeedback('shopText', '✨ บริการดีมาก คุ้มค่า')">
+                    <label for="shop-star4" title="4 ดาว">★</label>
+                    <input type="radio" id="shop-star3" name="shop_rating" value="3" onclick="setFeedback('shopText', '👍 ปานกลาง ได้มาตรฐาน')">
+                    <label for="shop-star3" title="3 ดาว">★</label>
+                    <input type="radio" id="shop-star2" name="shop_rating" value="2" onclick="setFeedback('shopText', '🙂 พอใช้ อยากให้ปรับปรุงเพิ่มเติม')">
+                    <label for="shop-star2" title="2 ดาว">★</label>
+                    <input type="radio" id="shop-star1" name="shop_rating" value="1" onclick="setFeedback('shopText', '⚠️ ควรปรับปรุงการบริการ')">
+                    <label for="shop-star1" title="1 ดาว">★</label>
+                </div>
+                <div class="star-feedback-text" id="shopText">คลิกเพื่อให้คะแนนดาว (1 - 5 ดาว)</div>
+            </div>
+
+            <textarea name="shop_comment" class="review-textarea" rows="3"
+                      placeholder="เขียนความประทับใจ หรือข้อเสนอแนะเกี่ยวกับบริการ ความสะอาด หรือกลิ่นอโรม่าของร้าน..."></textarea>
+        </div>
+
+        <!-- 2. รีวิวพนักงานผู้ดูแลน้องแมว -->
+        <div class="review-section">
+            <div class="section-legend">
+                <span>👩‍💼</span> 2. รีวิวพนักงานผู้ดูแลน้องแมว
+            </div>
+
+            {% if staff %}
+                <div class="staff-target-strip">
+                    <img src="{{ url_for('static', filename='images/' + staff.image) }}" alt="{{ staff.name }}" class="staff-target-thumb">
+                    <div>
+                        <strong style="color: #2b1820; font-size: 14px;">คุณ{{ staff.nickname }}</strong>
+                        <div style="font-size: 12px; color: var(--pink-primary); font-weight: 600;">{{ staff.role_title }}</div>
+                    </div>
+                </div>
+                <div class="section-subdesc">
+                    ให้คะแนนความอ่อนโยน มือเบา ความใส่ใจ และการดูแลน้อง{{ booking.cat_name }} ของคุณ{{ staff.nickname }}
+                </div>
+            {% else %}
+                <div class="section-subdesc">
+                    ให้คะแนนความอ่อนโยน มือเบา และความใส่ใจของทีมงานพี่เลี้ยงที่ดูแลน้อง{{ booking.cat_name }}
+                </div>
+            {% endif %}
+
+            <div class="star-rating-box">
+                <div class="star-row">
+                    <input type="radio" id="staff-star5" name="staff_rating" value="5" onclick="setFeedback('staffText', '💖 มือเบามาก น้องไม่เครียดเลย รักเลย!')">
+                    <label for="staff-star5" title="5 ดาว">★</label>
+                    <input type="radio" id="staff-star4" name="staff_rating" value="4" onclick="setFeedback('staffText', '✨ ดูแลดี อ่อนโยนและใส่ใจ')">
+                    <label for="staff-star4" title="4 ดาว">★</label>
+                    <input type="radio" id="staff-star3" name="staff_rating" value="3" onclick="setFeedback('staffText', '👍 ดูแลได้ดีตามมาตรฐาน')">
+                    <label for="staff-star3" title="3 ดาว">★</label>
+                    <input type="radio" id="staff-star2" name="staff_rating" value="2" onclick="setFeedback('staffText', '🙂 พอใช้ได้')">
+                    <label for="staff-star2" title="2 ดาว">★</label>
+                    <input type="radio" id="staff-star1" name="staff_rating" value="1" onclick="setFeedback('staffText', '⚠️ น้องดูเครียด อยากให้ปรับปรุง')">
+                    <label for="staff-star1" title="1 ดาว">★</label>
+                </div>
+                <div class="star-feedback-text" id="staffText">คลิกเพื่อให้คะแนนความอ่อนโยนของพนักงาน (1 - 5 ดาว)</div>
+            </div>
+
+            <textarea name="staff_comment" class="review-textarea" rows="3"
+                      placeholder="ส่งข้อความถึงพี่ๆ พนักงาน เช่น น้องกลับมาขนนุ่มหอมมาก มือเบาใจเย็นมาก ขอบคุณที่เอ็นดูน้อง..."></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-review-btn">
+            <span>🐾</span> บันทึกและส่งรีวิวความประทับใจ
+        </button>
+
+        <a href="{{ url_for('bookings') }}" class="back-link">
+            ← ยังไม่สะดวกตอนนี้ ขอกลับไปหน้ารายการจองก่อน
+        </a>
+
+    </form>
+
+</div>
+
+<script>
+    function setFeedback(elementId, text) {
+        document.getElementById(elementId).innerText = text;
+    }
+</script>
+
+</body>
+</html>

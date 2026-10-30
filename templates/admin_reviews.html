@@ -1,0 +1,189 @@
+{% extends "admin_base.html" %}
+
+{% block title %}ภาพรวมรีวิวจากลูกค้า | Admin Cat Spa{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>⭐ ภาพรวมรีวิวและความคิดเห็นจากลูกค้า (Customer Reviews Overview)</h1>
+        <p>รายงานสถิติความพึงพอใจต่อร้าน Cat Spa & Grooming และการให้คะแนนการดูแลของพี่ๆ พนักงานทุกคน</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('staff_page') }}" target="_blank" class="admin-btn admin-btn-outline-primary">
+            🌐 ดูรีวิวบนหน้าร้าน
+        </a>
+    </div>
+</div>
+
+<!-- สรุปตัวเลขสถิติรีวิวภาพรวม -->
+<section class="admin-stats-grid" style="margin-top: 15px;">
+    <!-- คะแนนร้านค้าเฉลี่ย -->
+    <div class="admin-stat-card stat-completed">
+        <div class="stat-info">
+            <h3>🏪 คะแนนร้านค้าเฉลี่ย</h3>
+            <div class="stat-number" style="color: #ed5682;">
+                ⭐ {{ "%.1f"|format(avg_shop_rating or 5.0) }} <span style="font-size: 14px; color: #7f6e76;">/ 5.0</span>
+            </div>
+            <div class="stat-desc">จากทั้งหมด {{ total_reviews }} รายการรีวิว</div>
+        </div>
+        <div class="stat-icon">✨</div>
+    </div>
+
+    <!-- คะแนนพนักงานเฉลี่ย -->
+    <div class="admin-stat-card stat-confirmed">
+        <div class="stat-info">
+            <h3>👩‍💼 คะแนนพนักงานเฉลี่ย</h3>
+            <div class="stat-number" style="color: #0284c7;">
+                ⭐ {{ "%.1f"|format(avg_staff_rating or 5.0) }} <span style="font-size: 14px; color: #7f6e76;">/ 5.0</span>
+            </div>
+            <div class="stat-desc">ความอ่อนโยนและการดูแลน้องแมว</div>
+        </div>
+        <div class="stat-icon">💖</div>
+    </div>
+
+    <!-- สรุปแยกตามพนักงาน -->
+    {% for st in staff_summary %}
+    <div class="admin-stat-card stat-pending" style="border-left-color: #f472b6;">
+        <div class="stat-info">
+            <h3 style="display: flex; align-items: center; gap: 6px;">
+                <img src="{{ url_for('static', filename='images/' + st.image) }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                คุณ{{ st.nickname }}
+            </h3>
+            <div class="stat-number" style="font-size: 22px; color: #b45309;">
+                ⭐ {{ "%.1f"|format(st.staff_avg or 5.0) }}
+            </div>
+            <div class="stat-desc">ได้รับ {{ st.rev_count }} รีวิว</div>
+        </div>
+        <div class="stat-icon">🐾</div>
+    </div>
+    {% endfor %}
+</section>
+
+<!-- แถบตัวกรองการแสดงผลรีวิว -->
+<div class="admin-card" style="margin-top: 24px; border-radius: 16px; padding: 18px 24px; background: white; border: 1.5px solid #f2dce5;">
+    <form method="GET" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div>
+                <label style="font-size: 13px; font-weight: 700; color: #475569; margin-right: 6px;">พนักงาน:</label>
+                <select name="staff_id" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 13px;">
+                    <option value="all">พนักงานทุกคน</option>
+                    {% for st in staff_summary %}
+                        <option value="{{ st.staff_id }}" {% if selected_staff_id == st.staff_id|string %}selected{% endif %}>
+                            คุณ{{ st.nickname }} ({{ st.rev_count }} รีวิว)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="font-size: 13px; font-weight: 700; color: #475569; margin-right: 6px;">คะแนนดาว:</label>
+                <select name="rating" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 13px;">
+                    <option value="all">ทุกระดับคะแนน</option>
+                    <option value="5" {% if selected_rating == '5' %}selected{% endif %}>⭐⭐⭐⭐⭐ (5 ดาว)</option>
+                    <option value="4" {% if selected_rating == '4' %}selected{% endif %}>⭐⭐⭐⭐ (4 ดาว)</option>
+                    <option value="3" {% if selected_rating == '3' %}selected{% endif %}>⭐⭐⭐ (3 ดาว)</option>
+                    <option value="2" {% if selected_rating == '2' %}selected{% endif %}>⭐⭐ (2 ดาว)</option>
+                    <option value="1" {% if selected_rating == '1' %}selected{% endif %}>⭐ (1 ดาว)</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <span style="font-size: 13.5px; color: #64748b; font-weight: 600;">
+                พบรีวิวตามเงื่อนไข: <strong>{{ reviews|length }}</strong> รายการ
+            </span>
+        </div>
+    </form>
+</div>
+
+<!-- ตารางแสดงรายการรีวิวทั้งหมด -->
+<div class="admin-card" style="margin-top: 20px; border-radius: 18px; border: 1.5px solid #f2dce5; overflow: hidden; background: white;">
+    {% if reviews %}
+        <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #fff0f5; color: #332228; text-align: left; font-size: 13px;">
+                        <th style="padding: 12px 16px; width: 60px;">#คิว</th>
+                        <th style="padding: 12px 16px;">ลูกค้า / น้องแมว</th>
+                        <th style="padding: 12px 16px;">บริการ & ผู้ดูแล</th>
+                        <th style="padding: 12px 16px; min-width: 220px;">รีวิวร้านค้า (Shop)</th>
+                        <th style="padding: 12px 16px; min-width: 220px;">รีวิวพนักงาน (Staff)</th>
+                        <th style="padding: 12px 16px; width: 140px;">วันเวลาที่รีวิว</th>
+                        <th style="padding: 12px 16px; width: 80px; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rv in reviews %}
+                    <tr style="border-bottom: 1px solid #fce7f0; font-size: 13px;">
+                        <!-- รหัสคิว -->
+                        <td style="padding: 14px 16px; font-weight: 700; color: #ed5682;">
+                            #{{ rv.booking_id }}
+                        </td>
+
+                        <!-- ลูกค้าและน้องแมว -->
+                        <td style="padding: 14px 16px;">
+                            <strong style="color: #1e293b; display: block;">คุณ{{ rv.user_name }}</strong>
+                            <span style="color: #64748b; font-size: 12px;">น้อง{{ rv.cat_name }}</span>
+                        </td>
+
+                        <!-- บริการ & ผู้ดูแล -->
+                        <td style="padding: 14px 16px;">
+                            <div style="color: #334155; font-weight: 600;">{{ rv.service_name }}</div>
+                            {% if rv.staff_name %}
+                                <span style="background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; margin-top: 3px;">
+                                    🌸 คุณ{{ rv.staff_name }}
+                                </span>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 11.5px; font-style: italic;">ร้านจัดสรรให้</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- รีวิวร้าน -->
+                        <td style="padding: 14px 16px;">
+                            <div style="color: #f59e0b; font-size: 13px; font-weight: 700; margin-bottom: 3px;">
+                                {% for _ in range(rv.shop_rating or 5) %}★{% endfor %}
+                                <span style="color: #b45309; font-size: 12px;">({{ rv.shop_rating }}/5)</span>
+                            </div>
+                            <div style="color: #475569; font-size: 12.5px; line-height: 1.4;">
+                                {{ rv.shop_comment or '-' }}
+                            </div>
+                        </td>
+
+                        <!-- รีวิวพนักงาน -->
+                        <td style="padding: 14px 16px;">
+                            <div style="color: #0284c7; font-size: 13px; font-weight: 700; margin-bottom: 3px;">
+                                {% for _ in range(rv.staff_rating or 5) %}★{% endfor %}
+                                <span style="color: #0369a1; font-size: 12px;">({{ rv.staff_rating }}/5)</span>
+                            </div>
+                            <div style="color: #475569; font-size: 12.5px; line-height: 1.4;">
+                                {{ rv.staff_comment or '-' }}
+                            </div>
+                        </td>
+
+                        <!-- วันเวลา -->
+                        <td style="padding: 14px 16px; color: #64748b; font-size: 12px;">
+                            {{ rv.created_at }}
+                        </td>
+
+                        <!-- ลบรีวิว -->
+                        <td style="padding: 14px 16px; text-align: center;">
+                            <form method="POST" action="{{ url_for('admin_delete_review', review_id=rv.review_id) }}" onsubmit="return confirm('ต้องการลบรีวิวนี้หรือไม่? ระบบจะคำนวณคะแนนใหม่โดยอัตโนมัติ')">
+                                <button type="submit" style="background: none; border: none; color: #e11d48; cursor: pointer; font-size: 16px;" title="ลบรีวิวนี้">
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 48px 20px; color: #88727d;">
+            <div style="font-size: 42px; margin-bottom: 8px;">⭐</div>
+            <h3 style="color: #ed5682; margin: 0 0 6px;">ยังไม่มีข้อมูลรีวิวในขณะนี้</h3>
+            <p style="font-size: 13.5px; margin: 0;">เมื่อลูกค้าที่รับบริการเสร็จสิ้นส่งความคิดเห็น รายการรีวิวจะปรากฏที่หน้านี้โดยอัตโนมัติค่ะ</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

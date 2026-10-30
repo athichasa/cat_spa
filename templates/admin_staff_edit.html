@@ -1,0 +1,114 @@
+{% extends "admin_base.html" %}
+
+{% block title %}แก้ไขข้อมูลพนักงาน: คุณ{{ staff.nickname }} | Admin Cat Spa{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div class="page-title">
+        <h1>✏️ แก้ไขข้อมูลพนักงาน: คุณ{{ staff.nickname }}</h1>
+        <p>ปรับปรุงรายละเอียดความเชี่ยวชาญ จุดเด่นในการดูแล ประสบการณ์ และสถานะพร้อมให้บริการ</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin_staff') }}" class="admin-btn admin-btn-outline-primary">
+            ← กลับหน้ารายการพนักงาน
+        </a>
+    </div>
+</div>
+
+<div class="admin-card" style="max-width: 720px; margin: 20px auto; border-radius: 20px; border: 1.5px solid #f2dce5; padding: 28px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+
+    <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- พรีวิวและอัปโหลดรูปพนักงาน -->
+        <div style="display: flex; align-items: center; gap: 20px; background: #fff5f8; padding: 18px; border-radius: 16px; border: 1px solid #fce7f0;">
+            <img src="{{ url_for('static', filename='images/' + staff.image) }}" alt="{{ staff.nickname }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ed5682; box-shadow: 0 4px 12px rgba(237, 86, 130, 0.2); background: white;">
+            <div>
+                <strong style="color: #2b1820; font-size: 15px; display: block; margin-bottom: 4px;">รูปภาพโปรไฟล์พนักงาน</strong>
+                <p style="margin: 0 0 8px; font-size: 12.5px; color: #7f6e76;">สามารถอัปโหลดไฟล์รูปภาพใหม่ (JPG, PNG, WEBP) เพื่อเปลี่ยนรูปได้ค่ะ</p>
+                <input type="file" name="image" accept="image/*" style="font-size: 12.5px;">
+            </div>
+        </div>
+
+        <!-- ชื่อเล่นพนักงาน -->
+        <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                🏷️ ชื่อเล่นของพนักงาน <span style="color: #e11d48;">*</span>
+            </label>
+            <input type="text" name="nickname" value="{{ staff.nickname }}" required
+                   style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14.5px; box-sizing: border-box;">
+            <small style="color: #88727d; font-size: 12px;">จะแสดงเฉพาะชื่อเล่นนี้บนหน้าเว็บและหน้าจองคิว เช่น ต้นเตย, มีมี่, อุ๋มอิ๋ม</small>
+        </div>
+
+        <!-- ตำแหน่งหน้าที่ -->
+        <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                💼 ตำแหน่ง / ความถนัดหลัก <span style="color: #e11d48;">*</span>
+            </label>
+            <input type="text" name="role_title" value="{{ staff.role_title }}" required
+                   style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14.5px; box-sizing: border-box;">
+        </div>
+
+        <!-- ประสบการณ์ & สถานะการให้บริการ -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                    🏆 ประสบการณ์ทำงาน (ปี) <span style="color: #e11d48;">*</span>
+                </label>
+                <input type="number" name="experience_years" value="{{ staff.experience_years }}" min="1" max="40" required
+                       style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14.5px; box-sizing: border-box;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                    🟢 ข้อความสถานะพร้อมให้บริการ
+                </label>
+                <input type="text" name="status_text" value="{{ staff.status_text or 'พร้อมให้บริการ' }}"
+                       style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14.5px; box-sizing: border-box;">
+            </div>
+        </div>
+
+        <!-- ความเชี่ยวชาญพิเศษ -->
+        <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                ✨ ความเชี่ยวชาญพิเศษ (คั่นด้วยเครื่องหมายจุลภาค ,)
+            </label>
+            <input type="text" name="specialties" value="{{ staff.specialties }}"
+                   placeholder="เช่น สปาอโรม่าบำบัด, วารีบำบัดขนนุ่ม, นวดผ่อนคลายกล้ามเนื้อ"
+                   style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14.5px; box-sizing: border-box;">
+        </div>
+
+        <!-- จุดเด่นในการดูแลแมว -->
+        <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #332228;">
+                💖 จุดเด่นในการดูแลน้องแมว (Care Highlights)
+            </label>
+            <textarea name="highlights" rows="3"
+                      style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 14px; box-sizing: border-box; resize: vertical;">{{ staff.highlights }}</textarea>
+        </div>
+
+        <!-- เปิด/ปิดการให้บริการ -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong style="color: #1e293b; font-size: 14px;">เปิดให้ลูกค้าเลือกจองในระบบ</strong>
+                <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">หากปิดการใช้งาน พนักงานคนนี้จะไม่ปรากฏในการ์ดตัวเลือกหน้าจองคิว</p>
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 14px; color: #0f172a;">
+                <input type="checkbox" name="is_active" value="1" {% if staff.is_active %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #ed5682;">
+                เปิดใช้งาน
+            </label>
+        </div>
+
+        <!-- ปุ่มบันทึก -->
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+            <button type="submit" class="admin-btn admin-btn-primary" style="flex: 1; justify-content: center; padding: 12px;">
+                <span>💾</span> บันทึกการแก้ไขข้อมูล
+            </button>
+            <a href="{{ url_for('admin_staff') }}" class="admin-btn admin-btn-outline-primary" style="padding: 12px 20px;">
+                ยกเลิก
+            </a>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}
